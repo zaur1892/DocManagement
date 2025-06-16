@@ -51,7 +51,7 @@ app.UseStatusCodePages(async context =>
 
         case StatusCodes.Status404NotFound:
             title = "Səhifə tapılmadı";
-            message = "Bu əməliyyatı etmək üçün hüququnuz yoxdur və ya axtardığınız səhifə mövcud deyil.";
+            message = "Bu əməliyyatı etmək üçün hüququnuz yoxdur və ya axtardığınız səhifə mövcud deyil."; 
             break;
 
         default:
