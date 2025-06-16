@@ -1,0 +1,16 @@
+﻿@model Document
+<h2>Silmək istədiyinizə əminsiniz?</h2>
+<div>
+    <strong>@Model.Title</strong> - @Model.DocumentNumber
+</div>
+<div class="form-group">
+    <label asp-for="TrainArrivalTime" class="control-label"></label>
+    <input asp-for="TrainArrivalTime" class="form-control" type="datetime-local" />
+    <span asp-validation-for="TrainArrivalTime" class="text-danger"></span>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Sil</button>
+    <a asp-action="Index" class="btn btn-secondary">Ləğv et</a>
+</form>

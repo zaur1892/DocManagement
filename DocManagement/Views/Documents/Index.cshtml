@@ -1,0 +1,43 @@
+﻿@model IEnumerable<DocManagement.Models.Document>
+
+@{
+    ViewData["Title"] = "Sənədlər";
+}
+
+<h1>Sənədlər</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create">Yeni Sənəd</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Başlıq</th>
+            <th>No</th>
+            <th>Tarix</th>
+            <th>Qatarın Gəliş Vaxtı</th>
+            <th></th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in Model)
+        {
+            <tr>
+                <td>@d.Id</td>
+                <td>@d.Title</td>
+                <td>@d.DocumentNumber</td>
+                <td>@d.CreatedAt.ToShortDateString()</td>
+                <td>@d.TrainArrivalTime.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@d.Id">Düzənlə</a>
+                    <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@d.Id">Sil</a>
+                    <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@d.Id">Ətraflı</a>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
