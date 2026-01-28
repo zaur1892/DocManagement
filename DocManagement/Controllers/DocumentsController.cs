@@ -26,7 +26,7 @@ namespace DocManagement.Controllers
         {
             _context = context;
         }
-
+//goz deneme
         // GET: Documents
         public IActionResult Index(
             DateTime? startDate,
