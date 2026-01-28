@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250616144651_AddTrainArrivalTime2")]
-    partial class AddTrainArrivalTime2
+    [Migration("20250616144651_AddDocRegisterDate2")]
+    partial class AddDocRegisterDate2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace DocManagement.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("TrainArrivalTime")
+                    b.Property<DateTime>("DocRegisterDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

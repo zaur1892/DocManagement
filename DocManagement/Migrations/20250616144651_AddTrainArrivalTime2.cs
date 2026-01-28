@@ -6,13 +6,13 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DocManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTrainArrivalTime2 : Migration
+    public partial class AddDocRegisterDate2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<DateTime>(
-                name: "TrainArrivalTime",
+                name: "DocRegisterDate",
                 table: "Documents",
                 type: "datetime2",
                 nullable: false,
@@ -23,7 +23,7 @@ namespace DocManagement.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "TrainArrivalTime",
+                name: "DocRegisterDate",
                 table: "Documents");
         }
     }

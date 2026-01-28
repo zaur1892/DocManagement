@@ -5,7 +5,7 @@
 namespace DocManagement.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTrainArrivalTime : Migration
+    public partial class AddDocRegisterDate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

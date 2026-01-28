@@ -1,0 +1,55 @@
+﻿@model DocManagement.Models.RegisterViewModel
+
+<h2>Qeydiyyat</h2>
+
+<form asp-action="Register" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group mb-2">
+        <label asp-for="UserName"></label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" type="password" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-2">
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" class="form-control" type="password" />
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+    </div>
+
+    <form asp-action="Register" method="post">
+        <!-- Digər inputlar -->
+
+        <div class="form-group mb-2">
+            <label asp-for="Role"></label>
+            <select asp-for="Role" class="form-control">
+                <option value="">Rol seçin</option>
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+                <!-- Buraya digər rollar -->
+            </select>
+            <span asp-validation-for="Role" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Qeydiyyat</button>
+    </form>
+
+
+    <button type="submit" class="btn btn-primary">Qeydiyyatdan keç</button>
+</form>
+
+<div class="mt-3">
+    <a asp-action="Login">Hesabınız var? Daxil olun</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

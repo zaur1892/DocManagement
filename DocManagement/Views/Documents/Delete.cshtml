@@ -1,16 +1,23 @@
-﻿@model Document
-<h2>Silmək istədiyinizə əminsiniz?</h2>
-<div>
-    <strong>@Model.Title</strong> - @Model.DocumentNumber
-</div>
-<div class="form-group">
-    <label asp-for="TrainArrivalTime" class="control-label"></label>
-    <input asp-for="TrainArrivalTime" class="form-control" type="datetime-local" />
-    <span asp-validation-for="TrainArrivalTime" class="text-danger"></span>
+﻿@model DocManagement.Models.Document
+
+<h2>Əminsiniz?</h2>
+
+<div class="alert alert-warning">
+    <strong>@Model.DocumentType</strong> — @Model.DocumentType sənədini silmək istədiyinizə əminsiniz?
 </div>
 
-<form asp-action="Delete">
+<p>
+    Bu sənəd <strong>passiv ediləcək</strong> (status = 0).
+</p>
+
+<form asp-action="Delete" method="post">
     <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Sil</button>
-    <a asp-action="Index" class="btn btn-secondary">Ləğv et</a>
+
+    <button type="submit" class="btn btn-danger">
+        Sil
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Geri
+    </a>
 </form>

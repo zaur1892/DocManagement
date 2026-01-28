@@ -1,0 +1,106 @@
+﻿@model List<DocumentAuditViewModel>
+
+@{
+    var first = Model.First();
+}
+
+
+<div class="d-flex justify-content-end mb-3">
+    <a asp-action="DetailsPdf"
+       asp-route-id="@Model.First().DocumentId"
+       class="btn btn-danger">
+        PDF-ə ixrac et
+    </a>
+</div>
+
+
+<div class="a4">
+    <h3 class="text-center">SƏNƏD TARİXÇƏSİ</h3>
+    <hr />
+
+    <p>
+        <strong>Tələbnamə:</strong> @first.DocumentId <br />
+        <strong>Qeyd:</strong> @(string.IsNullOrWhiteSpace(first.Note) ? "-" : first.Note)
+    </p>
+
+
+    <hr />
+    <h5>Dəyişikliklər</h5>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Sahə</th>
+                <th>Köhnə</th>
+                <th>Yeni</th>
+                <th>Dəyişən</th>
+                <th>Tarix</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 1; i < Model.Count; i++)
+            {
+                var prev = Model[i - 1];
+                var curr = Model[i];
+
+                if (prev.Note != curr.Note)
+                {
+                    <tr>
+                        <td>Qeyd</td>
+                        <td>@prev.Note</td>
+                        <td>@curr.Note</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+                if (prev.StatusName != curr.StatusName)
+                {
+                    <tr>
+                        <td>Status</td>
+                        <td>@prev.StatusName</td>
+                        <td>@curr.StatusName</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+                if (prev.ZoneName != curr.ZoneName)
+                {
+                    <tr>
+                        <td>Zona</td>
+                        <td>@prev.ZoneName</td>
+                        <td>@curr.ZoneName</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+                if (prev.EquipmentName != curr.EquipmentName)
+                {
+                    <tr>
+                        <td>Avadanlıq</td>
+                        <td>@prev.EquipmentName</td>
+                        <td>@curr.EquipmentName</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+                @if (prev.DocumentTypeName != curr.DocumentTypeName)
+                {
+                    <tr>
+                        <td>Tələbnamə</td>
+                        <td>@(prev.DocumentTypeName ?? "-")</td>
+                        <td>@(curr.DocumentTypeName ?? "-")</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+            }
+        </tbody>
+    </table>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary mt-3">Geri</a>

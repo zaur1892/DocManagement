@@ -1,0 +1,51 @@
+﻿@model List<DocumentAuditViewModel>
+@{
+    Layout = null;
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    }
+
+    .a4 {
+        width: 210mm;
+        padding: 20px;
+    }
+
+    .log-box {
+        border-left: 4px solid #333;
+        padding-left: 10px;
+        margin-bottom: 15px;
+    }
+
+    .log-header {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="a4">
+    <h2 style="text-align:center">SƏNƏD TARİXÇƏSİ</h2>
+    <hr />
+
+    @foreach (var log in Model)
+    {
+        <div class="log-box">
+            <div class="log-header">
+                @log.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")
+                – @log.LogActionName
+            </div>
+
+            <div><strong>Status:</strong> @log.StatusName</div>
+            <div><strong>Zona:</strong> @(log.ZoneName ?? "-")</div>
+            <div><strong>Avadanlıq:</strong> @(log.EquipmentName ?? "-")</div>
+            <div><strong>Qeyd:</strong> @(string.IsNullOrWhiteSpace(log.Note) ? "-" : log.Note)</div>
+            <div>
+                <strong>Əməliyyatı edən:</strong>
+                @(log.EditedByUserName ?? log.CreatedByUserName)
+            </div>
+        </div>
+    }
+</div>

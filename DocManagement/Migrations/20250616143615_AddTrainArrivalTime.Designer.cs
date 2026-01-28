@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250616143615_AddTrainArrivalTime")]
-    partial class AddTrainArrivalTime
+    [Migration("20250616143615_AddDocRegisterDate")]
+    partial class AddDocRegisterDate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

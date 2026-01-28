@@ -45,7 +45,7 @@ namespace DocManagement.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("TrainArrivalTime")
+                    b.Property<DateTime>("DocRegisterDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

@@ -1,6 +1,8 @@
 ﻿using DocManagement.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRotativa();
 
 
 app.UseStatusCodePages(async context =>
@@ -112,5 +115,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 // --- Yeni əlavə bitdi ---
+builder.Services.AddHttpContextAccessor();
+
 
 app.Run();
