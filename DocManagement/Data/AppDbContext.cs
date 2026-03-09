@@ -27,6 +27,13 @@ namespace DocManagement.Data
         public DbSet<DocumentType> DocumentTypes { get; set; }
 
 
+
+        public DbSet<DocumentListView> vw_DocumentList { get; set; }
+        public DbSet<DocElement> DocElements { get; set; }
+
+
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 🔴 ÇOX VACİB – ƏVVƏL BASE
@@ -53,6 +60,10 @@ namespace DocManagement.Data
             //    .WithMany(t => t.Documents)
             //    .HasForeignKey(d => d.DocumentTypeId)
             //    .OnDelete(DeleteBehavior.Restrict);
+
+
+
+
         }
 
 
