@@ -1,30 +1,28 @@
-﻿@model IEnumerable<DocManagement.Models.Document>
+﻿@model IEnumerable<DocManagement.Models.DocumentListView>
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @using System.Globalization
 
 @{
     ViewData["Title"] = "Sənədlər";
 
-    // 🔹 İLK AÇILIŞDA SON 1 AY
-    var startDateVal = string.IsNullOrEmpty(ViewBag.StartDate as string)
+    var currentAction = HttpContextAccessor.HttpContext.Request.RouteValues["action"]?.ToString();
+
+    var startDateVal = string.IsNullOrEmpty(ViewBag.StartDate as string) && currentAction == "Index"
         ? DateTime.Now.AddMonths(-1).ToString("yyyy-MM-dd")
         : ViewBag.StartDate;
 
-    var endDateVal = string.IsNullOrEmpty(ViewBag.EndDate as string)
+    var endDateVal = string.IsNullOrEmpty(ViewBag.EndDate as string) && currentAction == "Index"
         ? DateTime.Now.ToString("yyyy-MM-dd")
         : ViewBag.EndDate;
 
-
-    var selectedType = HttpContextAccessor.HttpContext.Request.Query["documentTypeId"].ToString();
-    var selectedStatus = HttpContextAccessor.HttpContext.Request.Query["statusId"].ToString();
-
     var user = HttpContextAccessor.HttpContext.User;
     var isAdmin = user.IsInRole("Admin");
+
+    var columns = ViewBag.Columns as List<DocManagement.Models.DocElement>;
 }
 
 <h1>Tələbnamələr</h1>
 
-<!-- SAĞ ÜST TARİX + SAAT -->
 <div style="text-align:right; font-weight:bold; margin-bottom:10px;">
     <div id="dateTimeAz"></div>
     <div id="weekDayAz" style="font-size:14px;"></div>
@@ -36,27 +34,20 @@
 
 <form method="get" asp-action="Index" class="row g-3 mb-3">
 
-    <!-- DOCUMENT TYPE -->
     <div class="col-md-3 col-sm-6">
         <label class="form-label">Tələbnamə Tipi</label>
-        <select name="documentTypeId"
-                class="form-control"
-                asp-items="ViewBag.DocumentTypeList">
+        <select name="documentTypeId" class="form-control" asp-items="ViewBag.DocumentTypeList">
             <option value="">-- Hamısı --</option>
         </select>
     </div>
 
-    <!-- STATUS (ƏLAVƏ OLUNDU) -->
     <div class="col-md-3 col-sm-6">
         <label class="form-label">Status</label>
-        <select name="statusId"
-                class="form-control"
-                asp-items="ViewBag.StatusList">
+        <select name="statusId" class="form-control" asp-items="ViewBag.StatusList">
             <option value="">-- Hamısı --</option>
         </select>
     </div>
 
-    <!-- TARİX -->
     <div class="col-md-2 col-sm-6">
         <label class="form-label">Başlanğıc Tarix</label>
         <input type="date" name="startDate" class="form-control" value="@startDateVal" />
@@ -67,170 +58,180 @@
         <input type="date" name="endDate" class="form-control" value="@endDateVal" />
     </div>
 
-    <!-- AXTAR -->
     <div class="col-md-2 col-sm-6 align-self-end">
         <button type="submit" class="btn btn-outline-primary w-100">Axtar</button>
     </div>
 
-    <!-- HAMISI -->
     <div class="col-md-3 col-sm-6 align-self-end">
-        <a asp-action="Index" class="btn btn-secondary w-100">Hamısını Göstər</a>
-    </div>
-
-    <!-- EXCEL -->
-    <div class="col-md-3 col-sm-6 align-self-end">
-        <a asp-action="ExportToExcel"
-           asp-route-startDate="@startDateVal"
-           asp-route-endDate="@endDateVal"
-           asp-route-documentTypeId="@selectedType"
-           asp-route-statusId="@selectedStatus"
-           class="btn btn-success w-100">
-            Excelə Yüklə
-        </a>
+        <a id="indexLink" asp-action="Index" class="btn btn-secondary w-100">Hamısını Göstər</a>
     </div>
 
     <div class="col-md-3 col-sm-6 align-self-end">
-    <a asp-controller="Documents"
-       asp-action="Teleblerim"
-       class="btn btn-outline-primary">
-        Tələblərim
-    </a>
+        <a id="teleblerimLink" asp-action="Teleblerim" class="btn btn-outline-primary w-100">Tələblərim</a>
     </div>
 
+    <div class="col-md-3 col-sm-6 align-self-end">
+        <a id="tamamlananlarLink" asp-action="Tamamlananlar" class="btn btn-outline-success w-100">Tamamlananlar</a>
+    </div>
 
+    <div class="col-md-3 col-sm-6 align-self-end">
+        <a id="excelLink" asp-action="ExportToExcel" class="btn btn-success w-100">Excelə Yüklə</a>
+    </div>
 
 </form>
 
+
 <div class="table-responsive">
     <table class="table table-striped table-bordered align-middle">
+
         <thead class="table-light">
-
-            <!-- 🔍 SÜTUN AXTARIŞI -->
             <tr>
-                <th><input class="form-control form-control-sm col-search" data-col="0" placeholder="Id" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="1" placeholder="Tip" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="2" placeholder="Tarix" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="3" placeholder="Status" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="4" placeholder="Zona" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="5" placeholder="Avadanlıq" /></th>
-                <th><input class="form-control form-control-sm col-search" data-col="6" placeholder="Qeyd" /></th>
-                <th></th>
-            </tr>
 
-            <style>
-                table th, table td {
-                    white-space: nowrap;
-                    vertical-align: middle;
+
+                @foreach (var col in columns)
+                {
+                    <th>@col.DisplayName</th>
                 }
 
-                    table th:nth-child(1), table td:nth-child(1) {
-                        width: 60px;
-                        text-align: center;
-                    }
-
-                    table th:nth-child(2), table td:nth-child(2) {
-                        min-width: 140px;
-                        max-width: 180px;
-                    }
-
-                    table th:nth-child(3), table td:nth-child(3) {
-                        width: 120px;
-                    }
-
-                    table th:nth-child(4), table td:nth-child(4) {
-                        min-width: 130px;
-                        max-width: 160px;
-                        text-align: center;
-                    }
-
-                    table th:nth-child(5), table td:nth-child(5) {
-                        min-width: 120px;
-                    }
-
-                    table th:nth-child(6), table td:nth-child(6) {
-                        min-width: 160px;
-                    }
-
-                    table th:nth-child(7), table td:nth-child(7) {
-                        min-width: 320px;
-                        white-space: normal;
-                    }
-
-                    table th:nth-child(8), table td:nth-child(8) {
-                        min-width: 160px;
-                        text-align: center;
-                    }
-            </style>
-
-            <tr>
-                <th>Id</th>
-                <th>Tələbnamə tipi</th>
-                <th>Tarix</th>
-                <th>Status</th>
-                <th>Zona</th>
-                <th>Avadanlıq</th>
-                <th>Qeyd</th>
                 <th>Əməliyyatlar</th>
+
             </tr>
         </thead>
 
         <tbody>
+
             @foreach (var d in Model)
             {
                 <tr>
-                    <td>@d.Id</td>
-                    <td>@d.DocumentType?.Name</td>
-                    <td>@d.CreatedAt.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("az-AZ"))</td>
+
+                  
+
+                    @foreach (var col in columns)
+                    {
+                        <td>
+
+                            @if (col.ColumnName == "DocumentTypeName")
+                            {
+                                @d.DocumentTypeName
+                            }
+
+                            else if (col.ColumnName == "Id")
+                            {
+                                @d.Id
+                            }
+
+
+                            else if (col.ColumnName == "CreatedAt")
+                            {
+                                @d.CreatedAt.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("az-AZ"))
+                            }
+                            else if (col.ColumnName == "StatusName")
+                            {
+                                <span class="badge" style="background:@d.StatusColor;color:white">
+                                    @d.StatusName
+                                </span>
+                            }
+                            else if (col.ColumnName == "ZoneName")
+                            {
+                                @(d.ZoneName ?? "-")
+                            }
+                            else if (col.ColumnName == "EquipmentName")
+                            {
+                                @(d.EquipmentName ?? "-")
+                            }
+                            else if (col.ColumnName == "Note")
+                            {
+                                @(string.IsNullOrWhiteSpace(d.Note) ? "-" : d.Note)
+                            }
+                            else if (col.ColumnName == "CustomFieldName1")
+                            {
+                                @(string.IsNullOrWhiteSpace(d.CustomFieldName1) ? "-" : d.CustomFieldName1)
+                            }
+                            else if (col.ColumnName == "CustomFieldName2")
+                            {
+                                @(string.IsNullOrWhiteSpace(d.CustomFieldName2) ? "-" : d.CustomFieldName2)
+                            }
+                            else if (col.ColumnName == "CustomFieldName3")
+                            {
+                                @(string.IsNullOrWhiteSpace(d.CustomFieldName3) ? "-" : d.CustomFieldName3)
+                            }
+
+                        </td>
+                    }
+
                     <td>
-                        <span class="badge" style="background:@d.DocumentStatus?.StatusColor?.Color;color:white">
-                            @d.DocumentStatus?.Name
-                        </span>
-                    </td>
-                    <td>@(d.Zone?.Name ?? "-")</td>
-                    <td>@(d.Equipment?.Name ?? "-")</td>
-                    <td>@(string.IsNullOrWhiteSpace(d.Note) ? "-" : d.Note)</td>
-                    <td>
+
                         @if (isAdmin)
                         {
                             <a asp-action="Edit" asp-route-id="@d.Id" class="btn btn-sm btn-info">Redaktə</a>
                             <a asp-action="Delete" asp-route-id="@d.Id" class="btn btn-sm btn-danger">Sil</a>
                         }
+
                         <a asp-action="Details" asp-route-id="@d.Id" class="btn btn-sm btn-secondary">Detal</a>
+
                     </td>
+
                 </tr>
             }
+
         </tbody>
     </table>
 </div>
 
+
 <script>
-    function updateDateTimeAz() {
-        const now = new Date();
-        const days = ["Bazar","Bazar ertəsi","Çərşənbə axşamı","Çərşənbə","Cümə axşamı","Cümə","Şənbə"];
 
-        document.getElementById("dateTimeAz").innerText =
-            now.toLocaleString("az-AZ");
+    function updateDateTimeAz(){
+    const now = new Date();
 
-        document.getElementById("weekDayAz").innerText =
-            days[now.getDay()];
+    const days = [
+    "Bazar",
+    "Bazar ertəsi",
+    "Çərşənbə axşamı",
+    "Çərşənbə",
+    "Cümə axşamı",
+    "Cümə",
+    "Şənbə"
+    ];
+
+    document.getElementById("dateTimeAz").innerText = now.toLocaleString("az-AZ");
+    document.getElementById("weekDayAz").innerText = days[now.getDay()];
     }
 
     updateDateTimeAz();
-    setInterval(updateDateTimeAz, 1000);
+    setInterval(updateDateTimeAz,1000);
 
-    // 🔍 COLUMN SEARCH
-    document.querySelectorAll('.col-search').forEach(input => {
-        input.addEventListener('input', function () {
-            const colIndex = parseInt(this.dataset.col);
-            const filter = this.value.toLowerCase();
 
-            document.querySelectorAll('table tbody tr').forEach(row => {
-                const cell = row.cells[colIndex];
-                row.style.display =
-                    cell && cell.innerText.toLowerCase().includes(filter)
-                        ? ''
-                        : 'none';
-            });
-        });
+    function setLinkQuery(linkId){
+
+    const link = document.getElementById(linkId);
+
+    link.addEventListener('click',function(e){
+
+    e.preventDefault();
+
+    const start = document.querySelector('input[name="startDate"]').value;
+    const end = document.querySelector('input[name="endDate"]').value;
+
+    const url = new URL(link.href,window.location.origin);
+
+    if(start) url.searchParams.set("startDate",start);
+    if(end) url.searchParams.set("endDate",end);
+
+    const docType = document.querySelector('select[name="documentTypeId"]').value;
+    const status = document.querySelector('select[name="statusId"]').value;
+
+    if(docType) url.searchParams.set("documentTypeId",docType);
+    if(status) url.searchParams.set("statusId",status);
+
+    window.location.href = url;
+
     });
+
+    }
+
+    setLinkQuery("teleblerimLink");
+    setLinkQuery("tamamlananlarLink");
+    setLinkQuery("excelLink");
+
 </script>

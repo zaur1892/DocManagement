@@ -32,64 +32,66 @@ namespace DocManagement.Controllers
             DateTime? startDate,
             DateTime? endDate,
             int? documentTypeId,
-            int? statusId
-        )
+            int? statusId)
         {
-            // Default tarixlər → bu gün yox son 1 Ay
-            if (!startDate.HasValue)
-                startDate = DateTime.Today.AddMonths(-1);
+            // 🔹 AppSettings-dən BeginDate oxu (format: YYYYMMDD, misal: 20260101)
+            var beginDateSetting = _context.AppSettings
+                .Where(x => x.Key == "BeginDate")
+                .Select(x => x.Value)
+                .FirstOrDefault();
 
-            if (!endDate.HasValue)
-                endDate = DateTime.Today;
+            var completedStatus = _context.AppSettings
+           .Where(x => x.Key == "CompletedStatusCode")
+           .Select(x => x.Value)
+           .FirstOrDefault();
 
 
-            var documents = _context.Documents
-                .Include(d => d.DocumentType)
-                .Include(d => d.DocumentStatus)
-                    .ThenInclude(s => s.StatusColor)
-                .Include(d => d.Zone)
-                .Include(d => d.Equipment)
-                .Where(d => d.DocumentStatusId != 0)
+            if (!string.IsNullOrEmpty(beginDateSetting) && beginDateSetting.Length == 8)
+            {
+                startDate = DateTime.ParseExact(beginDateSetting, "yyyyMMdd", null);
+            }
+
+            // 🔹 End date həmişə bu gün
+            endDate ??= DateTime.Today;
+
+            var documents = _context.vw_DocumentList
                 .Where(d =>
                     d.CreatedAt.Date >= startDate.Value.Date &&
-                    d.CreatedAt.Date <= endDate.Value.Date)
+                    d.CreatedAt.Date <= endDate.Value.Date &&
+                    d.StatusCode != completedStatus)
                 .AsQueryable();
 
-            // 🔹 DOCUMENT TYPE FILTER
             if (documentTypeId.HasValue)
-            {
-                documents = documents.Where(d => d.DocumentTypeId == documentTypeId.Value);
-            }
+                documents = documents.Where(d => d.DocumentTypeId == documentTypeId);
 
-            // 🔹 STATUS FILTER
             if (statusId.HasValue)
-            {
-                documents = documents.Where(d => d.DocumentStatusId == statusId.Value);
-            }
+                documents = documents.Where(d => d.DocumentStatusId == statusId);
 
             var result = documents
                 .OrderByDescending(d => d.CreatedAt)
                 .ToList();
 
-            // 🔹 View üçün saxla
             ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
             ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+            var columns = ViewBag.Columns as List<DocElement> ?? new List<DocElement>();
 
-            // 🔹 Document Type Combo
             ViewBag.DocumentTypeList = new SelectList(
                 _context.DocumentTypes.OrderBy(x => x.Name),
                 "Id",
                 "Name",
-                documentTypeId
-            );
+                documentTypeId);
 
-            // 🔹 Status Combo (VACİB – NullReference OLMAZ)
             ViewBag.StatusList = new SelectList(
                 _context.DocumentStatus.OrderBy(x => x.Name),
                 "Id",
                 "Name",
-                statusId
-            );
+                statusId);
+
+            // 🔥 BURANI ƏLAVƏ ET
+            ViewBag.Columns = _context.DocElements
+                .Where(x => x.IsVisible)
+                .OrderBy(x => x.OrderIndex)
+                .ToList();
 
             return View(result);
         }
@@ -377,7 +379,7 @@ public IActionResult Edit(int? id)
                 return NotFound();
 
             return new ViewAsPdf("DetailsPdf", logs)
-            {
+        {
                 FileName = $"Senəd_{id}.pdf",
                 PageSize = Size.A4,
                 PageOrientation = Orientation.Portrait,
@@ -386,69 +388,115 @@ public IActionResult Edit(int? id)
         }
 
 
+        public IActionResult Tamamlananlar(
+            DateTime? startDate,
+            DateTime? endDate,
+            int? documentTypeId,
+            int? statusId)
+        {
+            var completedStatus = _context.AppSettings
+                .Where(x => x.Key == "CompletedStatusCode")
+                .Select(x => x.Value)
+                .FirstOrDefault();
+
+            var documents = _context.vw_DocumentList
+                .Where(d => d.StatusCode == completedStatus)
+                .AsQueryable();
+
+            if (startDate.HasValue)
+                documents = documents.Where(d => d.CreatedAt.Date >= startDate.Value.Date);
+
+            if (endDate.HasValue)
+                documents = documents.Where(d => d.CreatedAt.Date <= endDate.Value.Date);
+
+            if (documentTypeId.HasValue)
+                documents = documents.Where(d => d.DocumentTypeId == documentTypeId);
+
+            if (statusId.HasValue)
+                documents = documents.Where(d => d.DocumentStatusId == statusId);
+
+            var result = documents
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
+
+            ViewBag.StartDate = startDate?.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
+            // 🔥 BURANI ƏLAVƏ ET
+            ViewBag.Columns = _context.DocElements
+                .Where(x => x.IsVisible)
+                .OrderBy(x => x.OrderIndex)
+                .ToList();
+
+            ViewBag.DocumentTypeList = new SelectList(
+                _context.DocumentTypes.OrderBy(x => x.Name),
+                "Id",
+                "Name",
+                documentTypeId);
+
+            ViewBag.StatusList = new SelectList(
+                _context.DocumentStatus.OrderBy(x => x.Name),
+                "Id",
+                "Name",
+                statusId);
+
+            return View("Index", result);
+        }
 
 
+        public IActionResult Teleblerim(
+     DateTime? startDate,
+     DateTime? endDate,
+     int? documentTypeId,
+     int? statusId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-public IActionResult Teleblerim(
-    DateTime? startDate,
-    DateTime? endDate,
-    int? documentTypeId,
-    int? statusId)
-    {
-        // 👤 Login olan user
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!startDate.HasValue)
+                startDate = DateTime.Today.AddMonths(-1);
 
-        // 📅 Default → son 1 ay
-        if (!startDate.HasValue)
-            startDate = DateTime.Today.AddMonths(-1);
+            if (!endDate.HasValue)
+                endDate = DateTime.Today;
 
-        if (!endDate.HasValue)
-            endDate = DateTime.Today;
+            var documents = _context.vw_DocumentList
+                .Where(d => d.UserId == userId)
+                .Where(d =>
+                    d.CreatedAt.Date >= startDate.Value.Date &&
+                    d.CreatedAt.Date <= endDate.Value.Date)
+                .AsQueryable();
 
-        var documents = _context.Documents
-            .Include(d => d.DocumentType)
-            .Include(d => d.DocumentStatus)
-                .ThenInclude(s => s.StatusColor)
-            .Include(d => d.Zone)
-            .Include(d => d.Equipment)
-            .Where(d => d.UserId == userId) // 🔥 ƏSAS ŞƏRT
-            .Where(d =>
-                d.CreatedAt.Date >= startDate.Value.Date &&
-                d.CreatedAt.Date <= endDate.Value.Date)
-            .AsQueryable();
+            if (documentTypeId.HasValue)
+                documents = documents.Where(d => d.DocumentTypeId == documentTypeId);
 
-        if (documentTypeId.HasValue)
-            documents = documents.Where(d => d.DocumentTypeId == documentTypeId.Value);
+            if (statusId.HasValue)
+                documents = documents.Where(d => d.DocumentStatusId == statusId);
 
-        if (statusId.HasValue)
-            documents = documents.Where(d => d.DocumentStatusId == statusId.Value);
+            var result = documents
+                .OrderByDescending(d => d.CreatedAt)
+                .ToList();
 
-        var result = documents
-            .OrderByDescending(d => d.CreatedAt)
-            .ToList();
+            ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+            // 🔥 BURANI ƏLAVƏ ET
+            ViewBag.Columns = _context.DocElements
+                .Where(x => x.IsVisible)
+                .OrderBy(x => x.OrderIndex)
+                .ToList();
 
-        // ViewBag-lar (Index-də nə var idisə EYNİSİ)
-        ViewBag.StartDate = startDate.Value.ToString("yyyy-MM-dd");
-        ViewBag.EndDate = endDate.Value.ToString("yyyy-MM-dd");
+            ViewBag.DocumentTypeList = new SelectList(
+                _context.DocumentTypes.OrderBy(x => x.Name),
+                "Id",
+                "Name",
+                documentTypeId);
 
-        ViewBag.DocumentTypeList = new SelectList(
-            _context.DocumentTypes.OrderBy(x => x.Name),
-            "Id",
-            "Name",
-            documentTypeId
-        );
+            ViewBag.StatusList = new SelectList(
+                _context.DocumentStatus.OrderBy(x => x.Name),
+                "Id",
+                "Name",
+                statusId);
 
-        ViewBag.StatusList = new SelectList(
-            _context.DocumentStatus.OrderBy(x => x.Name),
-            "Id",
-            "Name",
-            statusId
-        );
+            return View("Index", result);
+        }
 
-        // 🔁 EYNİ VIEW istifadə olunur
-        return View("Index", result);
+
     }
-
-
-}
 }

@@ -1,18 +1,26 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using DocManagement.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using DocManagement.Models;
 
 namespace DocManagement.Data
 {
     public class AppDbContext : IdentityDbContext // 👈 burada dəyişiklik
     {
+
+        // View üçün
+
+        // Dynamic columns
+        public DbSet<DocElement> DocElements { get; set; }
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
+        public DbSet<AppSetting> AppSettings { get; set; }
+
 
         public DbSet<Document> Documents { get; set; }
-        // 👇 MÜTLƏQ BU OLMALIDIR
+        public DbSet<DocumentListView> vw_DocumentList { get; set; }
+
 
         public DbSet<Zone> Zones { get; set; }
         public DbSet<Equipment> Equipments { get; set; }
@@ -46,13 +54,13 @@ namespace DocManagement.Data
                 .HasNoKey()
                 .ToView("vw_X_Documents_Audit");
 
-            base.OnModelCreating(modelBuilder);
+ 
+            
+           base.OnModelCreating(modelBuilder);
 
-            //modelBuilder.Entity<Document>()
-            //    .HasOne(d => d.DocumentType)
-            //    .WithMany(t => t.Documents)
-            //    .HasForeignKey(d => d.DocumentTypeId)
-            //    .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<DocumentListView>()
+                .HasNoKey()
+                .ToView("vw_DocumentList");
         }
 
 
