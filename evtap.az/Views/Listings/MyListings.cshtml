@@ -1,0 +1,100 @@
+@model List<EvtapAz.Models.Listing>
+@{
+    ViewData["Title"] = Localizer["Şəxsi Kabinet"];
+}
+
+<div class="main-container">
+    <div class="section-header">
+        <div>
+            <span class="section-title">@Localizer["Şəxsi Kabinet"] — @Localizer["Mənim Elanlarım"]</span>
+            <span class="badge-count">@Model.Count</span>
+        </div>
+        <a asp-action="Create" class="btn btn-accent">+ @Localizer["Yeni Elan"]</a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+            <h3>@Localizer["Elan tapılmadı"]</h3>
+            <p>@Localizer["Filtrləri dəyişin və ya ilk elanı siz yerləşdirin!"]</p>
+            <a asp-action="Create" class="btn btn-primary" style="margin-top:1rem">+ @Localizer["Yeni Elan Yerləşdir"]</a>
+        </div>
+    }
+    else
+    {
+        <div class="cabinet-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>@Localizer["Elan"] №</th>
+                        <th>@Localizer["Dəqiq Məkan"]</th>
+                        <th>@Localizer["Əmlak növü"]</th>
+                        <th>@Localizer["Qiymət (AZN)"]</th>
+                        <th>Tarix</th>
+                        <th>Status</th>
+                        <th>@Localizer["Əməliyyatlar"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var l in Model)
+                    {
+                        <tr>
+                            <td><strong style="color:var(--accent-dark)">@l.ListingNumber</strong></td>
+                            <td>
+                                @l.City.GetCurrentName()
+                                @if (l.District != null) { <text>, @l.District.GetCurrentName()</text> }
+                            </td>
+                            <td>@l.PropertyType?.GetCurrentName()</td>
+                            <td>
+                                @if (l.PriceMin.HasValue || l.PriceMax.HasValue)
+                                {
+                                    <text>@(l.PriceMin?.ToString("N0") ?? "?") — @(l.PriceMax?.ToString("N0") ?? "?")</text>
+                                }
+                                else { <text>—</text> }
+                            </td>
+                            <td style="white-space:nowrap">@l.CreatedAt.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if (!l.IsActive)
+                                {
+                                    <span class="status-badge status-inactive">⛔ @Localizer["Ləğv edilib"]</span>
+                                }
+                                else if (l.IsFrozen)
+                                {
+                                    <span class="status-badge status-frozen">⏸ @Localizer["Dondurulub"]</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-active">✅ @Localizer["Aktiv"]</span>
+                                }
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                                    <a asp-action="Details" asp-route-id="@l.Id" class="btn btn-primary btn-sm">@Localizer["Ətraflı"]</a>
+
+                                    @if (l.IsActive)
+                                    {
+                                        <form asp-action="ToggleFreeze" asp-route-id="@l.Id" method="post" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm @(l.IsFrozen ? "btn-success" : "btn-outline")">
+                                                @(l.IsFrozen ? $"▶ {Localizer["Aktivləşdir"]}" : $"⏸ {Localizer["Dondur"]}")
+                                            </button>
+                                        </form>
+
+                                        <form asp-action="Delete" asp-route-id="@l.Id" method="post" style="display:inline"
+                                              onsubmit="return confirm('@Localizer["Elanı ləğv etmək istəyirsiniz?"]')">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-danger btn-sm">✕ @Localizer["Ləğv et"]</button>
+                                        </form>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

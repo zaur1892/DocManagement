@@ -1,0 +1,269 @@
+@model EvtapAz.Models.SearchViewModel
+@{
+    ViewData["Title"] = "Ana Səhifə";
+    var cities = ViewBag.Cities as List<EvtapAz.Models.City>;
+    var propTypes = ViewBag.PropertyTypes as List<EvtapAz.Models.PropertyType>;
+    var totalPages = (int)Math.Ceiling((double)Model.TotalCount / Model.PageSize);
+}
+
+<!-- ═══════════════════════════════════════════
+     COMPACT HERO + SEARCH BAR
+═══════════════════════════════════════════ -->
+<section class="hero-compact">
+    <div class="hero-compact-inner">
+        <div class="hero-compact-text">
+            <span class="hero-badge">🏠 Yeni Konsept</span>
+            <h1>@Localizer["Siz mənzili deyil,"]<br /><span>@Localizer["mənzil sizi axtarır"]</span></h1>
+            <p>@Localizer["Kriteriyalarınızı yazın — əmlak sahibləri birbaşa sizinlə əlaqə qursun"]</p>
+        </div>
+        <a asp-controller="Listings" asp-action="Create" class="hero-cta">
+            + @Localizer["Yeni Elan Yerləşdir"]
+        </a>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════
+     MAIN LAYOUT: FILTER SIDEBAR + LISTINGS
+═══════════════════════════════════════════ -->
+<div class="search-listings-layout">
+
+    <!-- ── FILTER SIDEBAR ── -->
+    <aside class="filter-sidebar">
+        <form method="get" asp-controller="Home" asp-action="Index" id="searchForm">
+            <div class="filter-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/></svg>
+                @Localizer["Filtrlər"]
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Şəhər / Rayon"]</label>
+                <select name="CityId" id="citySelect" class="filter-select" onchange="loadDistricts(this.value)">
+                    <option value="">— @Localizer["Hamısı"] —</option>
+                    @foreach (var c in cities ?? new())
+                    {
+                        @Html.Raw($"<option value='{c.Id}' {(Model.CityId == c.Id ? "selected" : "")}>{c.GetCurrentName()}</option>")
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group" id="districtGroup" style="@(Model.DistrictId.HasValue ? "" : "display:none")">
+                <label class="filter-label">@Localizer["İnzibati Rayon"]</label>
+                <select name="DistrictId" id="districtSelect" class="filter-select" onchange="loadSettlements(this.value)">
+                    <option value="">— @Localizer["Seçin"] —</option>
+                </select>
+            </div>
+
+            <div class="filter-group" id="settlementGroup" style="display:none">
+                <label class="filter-label">@Localizer["Qəsəbə"]</label>
+                <select name="SettlementId" id="settlementSelect" class="filter-select">
+                    <option value="">— @Localizer["Seçin"] —</option>
+                </select>
+            </div>
+
+            <div class="filter-group" id="metroGroup" style="display:none">
+                <label class="filter-label">@Localizer["Metro"]</label>
+                <select name="MetroStationId" id="metroSelect" class="filter-select">
+                    <option value="">— @Localizer["Metro"] —</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Əmlak növü"]</label>
+                <select name="PropertyTypeId" class="filter-select">
+                    <option value="">— @Localizer["Hamısı"] —</option>
+                    @foreach (var p in propTypes ?? new())
+                    {
+                        @Html.Raw($"<option value='{p.Id}' {(Model.PropertyTypeId == p.Id ? "selected" : "")}>{p.Icon} {p.GetCurrentName()}</option>")
+                    }
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Sahə (m²)"]</label>
+                <div class="filter-range">
+                    <input type="number" name="AreaMin" class="filter-input" placeholder="@Localizer["min"]" value="@Model.AreaMin" />
+                    <span>—</span>
+                    <input type="number" name="AreaMax" class="filter-input" placeholder="@Localizer["max"]" value="@Model.AreaMax" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Otaq sayı"]</label>
+                <div class="filter-range">
+                    <input type="number" name="RoomMin" class="filter-input" placeholder="@Localizer["min"]" value="@Model.RoomMin" />
+                    <span>—</span>
+                    <input type="number" name="RoomMax" class="filter-input" placeholder="@Localizer["max"]" value="@Model.RoomMax" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Mərtəbə"]</label>
+                <div class="filter-range">
+                    <input type="number" name="FloorMin" class="filter-input" placeholder="@Localizer["min"]" value="@Model.FloorMin" />
+                    <span>—</span>
+                    <input type="number" name="FloorMax" class="filter-input" placeholder="@Localizer["max"]" value="@Model.FloorMax" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Qiymət (AZN)"]</label>
+                <div class="filter-range">
+                    <input type="number" name="PriceMin" class="filter-input" placeholder="@Localizer["min"]" value="@Model.PriceMin" />
+                    <span>—</span>
+                    <input type="number" name="PriceMax" class="filter-input" placeholder="@Localizer["max"]" value="@Model.PriceMax" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">@Localizer["Açar söz"]</label>
+                <input type="text" name="Keyword" class="filter-select" placeholder="@Localizer["axtar..."]" value="@Model.Keyword" />
+            </div>
+
+            <button type="submit" class="btn-filter-search">🔍 @Localizer["Axtar"]</button>
+
+            @if (Model.CityId.HasValue || Model.PropertyTypeId.HasValue || Model.RoomMin.HasValue || Model.PriceMin.HasValue || !string.IsNullOrEmpty(Model.Keyword))
+            {
+                <a href="/" class="btn-filter-reset">✕ @Localizer["Filtrləri sıfırla"]</a>
+            }
+        </form>
+    </aside>
+
+    <!-- ── LISTINGS PANEL ── -->
+    <main class="listings-panel">
+        <div class="listings-panel-header">
+            <div class="listings-count">
+                <strong>@Model.TotalCount</strong> @Localizer["elan tapıldı"]
+                @if (Model.CityId.HasValue || Model.PropertyTypeId.HasValue)
+                {
+                    <span class="filter-active-badge">@Localizer["Filtrlənib"]</span>
+                }
+            </div>
+            <a asp-controller="Listings" asp-action="Create" class="btn btn-accent btn-sm">
+                + @Localizer["Yeni Elan"]
+            </a>
+        </div>
+
+        @if (!Model.Results.Any())
+        {
+            <div class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <h3>@Localizer["Elan tapılmadı"]</h3>
+                <p>@Localizer["Filtrləri dəyişin və ya ilk elanı siz yerləşdirin!"]</p>
+                <a asp-controller="Listings" asp-action="Create" class="btn btn-primary" style="margin-top:1rem">+ @Localizer["Yeni Elan Yerləşdir"]</a>
+            </div>
+        }
+        else
+        {
+            <div class="listings-grid-v">
+                @foreach (var l in Model.Results)
+                {
+                    <div class="listing-card-h">
+                        <div class="lch-left">
+                            <div class="lch-badges">
+                                <span class="lch-number">@l.ListingNumber</span>
+                                @if (l.PropertyType != null)
+                                {
+                                    <span class="lch-type">@l.PropertyType.Icon @l.PropertyType.GetCurrentName()</span>
+                                }
+                                @if (l.BuildingType != null)
+                                {
+                                    <span class="lch-btype @(l.BuildingType.HasProjects ? "old" : "new")">
+                                        @(l.BuildingType.HasProjects ? Localizer["Köhnə tikili"] : Localizer["Yeni tikili"])
+                                    </span>
+                                }
+                            </div>
+
+                            <div class="lch-location">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                @l.City.GetCurrentName()@(l.District != null ? $", {l.District.GetCurrentName()}" : "")@(l.Settlement != null ? $" — {l.Settlement.GetCurrentName()}" : "")
+                            </div>
+
+                            @if (l.MetroStation != null)
+                            {
+                                <span class="metro-badge" style="background:@(l.MetroStation.LineColor ?? "#555")">🚇 @l.MetroStation.GetCurrentName()</span>
+                            }
+
+                            <div class="lch-specs">
+                                @if (l.RoomMin.HasValue || l.RoomMax.HasValue)
+                                {
+                                    <span>🚪 @(l.RoomMin ?? l.RoomMax)@(l.RoomMax.HasValue && l.RoomMax != l.RoomMin ? "–" + l.RoomMax : "") @Localizer["otaq"]</span>
+                                }
+                                @if (l.AreaMin.HasValue || l.AreaMax.HasValue)
+                                {
+                                    <span>📐 @(l.AreaMin ?? l.AreaMax)@(l.AreaMax.HasValue && l.AreaMax != l.AreaMin ? "–" + l.AreaMax : "") m²</span>
+                                }
+                                @if (l.FloorMin.HasValue || l.FloorMax.HasValue)
+                                {
+                                    <span>🏢 @(l.FloorMin ?? l.FloorMax)@(l.FloorMax.HasValue && l.FloorMax != l.FloorMin ? "–" + l.FloorMax : "") @Localizer["mərtəbə"]</span>
+                                }
+                                @if (l.RepairType != null)
+                                {
+                                    <span>🔧 @l.RepairType.GetCurrentName()</span>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(l.Notes))
+                            {
+                                <p class="lch-notes">@l.Notes</p>
+                            }
+                        </div>
+
+                        <div class="lch-right">
+                            @if (l.PriceMin.HasValue || l.PriceMax.HasValue)
+                            {
+                                <div class="lch-price">
+                                    @if (l.PriceMin.HasValue && l.PriceMax.HasValue && l.PriceMin != l.PriceMax)
+                                    {
+                                        @($"{l.PriceMin!.Value:N0} – {l.PriceMax!.Value:N0}")
+                                    }
+                                    else
+                                    {
+                                        @((l.PriceMin ?? l.PriceMax)!.Value.ToString("N0"))
+                                    }
+                                    <small>AZN</small>
+                                </div>
+                            }
+                            <div class="lch-date">📅 @l.CreatedAt.ToString("dd.MM.yyyy")</div>
+                            <a asp-controller="Listings" asp-action="Details" asp-route-id="@l.Id" class="btn btn-primary btn-sm lch-btn">
+                                @Localizer["Ətraflı"] →
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (totalPages > 1)
+            {
+                <div class="pagination">
+                    @if (Model.Page > 1)
+                    {
+                        <a href="?Page=@(Model.Page-1)&CityId=@Model.CityId&PropertyTypeId=@Model.PropertyTypeId" class="page-btn">‹</a>
+                    }
+                    @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(totalPages, Model.Page + 2); i++)
+                    {
+                        <a href="?Page=@i&CityId=@Model.CityId&PropertyTypeId=@Model.PropertyTypeId" class="page-btn @(i == Model.Page ? "active" : "")">@i</a>
+                    }
+                    @if (Model.Page < totalPages)
+                    {
+                        <a href="?Page=@(Model.Page+1)&CityId=@Model.CityId&PropertyTypeId=@Model.PropertyTypeId" class="page-btn">›</a>
+                    }
+                </div>
+            }
+        }
+    </main>
+</div>
+
+@section Scripts {
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    @if (Model.CityId.HasValue)
+    {
+        <text>loadDistricts(@Model.CityId, @(Model.DistrictId?.ToString() ?? "null"));</text>
+    }
+    @if (Model.DistrictId.HasValue)
+    {
+        <text>loadSettlements(@Model.DistrictId, @(Model.SettlementId?.ToString() ?? "null"));</text>
+    }
+});
+</script>
+}

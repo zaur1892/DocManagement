@@ -1,0 +1,255 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Ana Səhifə" xml:space="preserve">
+    <value>Главная</value>
+  </data>
+  <data name="Haqqında" xml:space="preserve">
+    <value>О нас</value>
+  </data>
+  <data name="Yeni Elan Yerləşdir" xml:space="preserve">
+    <value>Добавить объявление</value>
+  </data>
+  <data name="Şəxsi Kabinet" xml:space="preserve">
+    <value>Личный кабинет</value>
+  </data>
+  <data name="Mənim Elanlarım" xml:space="preserve">
+    <value>Мои объявления</value>
+  </data>
+  <data name="Çıxış" xml:space="preserve">
+    <value>Выйти</value>
+  </data>
+  <data name="Giriş" xml:space="preserve">
+    <value>Войти</value>
+  </data>
+  <data name="Qeydiyyat" xml:space="preserve">
+    <value>Регистрация</value>
+  </data>
+  <data name="Siz mənzili deyil," xml:space="preserve">
+    <value>Вы не ищете квартиру,</value>
+  </data>
+  <data name="mənzil sizi axtarır" xml:space="preserve">
+    <value>квартира ищет вас</value>
+  </data>
+  <data name="Kriteriyalarınızı yazın — əmlak sahibləri birbaşa sizinlə əlaqə qursun" xml:space="preserve">
+    <value>Укажите ваши критерии — владельцы недвижимости свяжутся с вами напрямую</value>
+  </data>
+  <data name="Filtrlər" xml:space="preserve">
+    <value>Фильтры</value>
+  </data>
+  <data name="Şəhər / Rayon" xml:space="preserve">
+    <value>Город / Район</value>
+  </data>
+  <data name="Hamısı" xml:space="preserve">
+    <value>Все</value>
+  </data>
+  <data name="İnzibati Rayon" xml:space="preserve">
+    <value>Район (в городе)</value>
+  </data>
+  <data name="Seçin" xml:space="preserve">
+    <value>Выберите</value>
+  </data>
+  <data name="Qəsəbə" xml:space="preserve">
+    <value>Поселок</value>
+  </data>
+  <data name="Metro" xml:space="preserve">
+    <value>Метро</value>
+  </data>
+  <data name="Əmlak növü" xml:space="preserve">
+    <value>Тип недвижимости</value>
+  </data>
+  <data name="Sahə (m²)" xml:space="preserve">
+    <value>Площадь (м²)</value>
+  </data>
+  <data name="Otaq sayı" xml:space="preserve">
+    <value>Количество комнат</value>
+  </data>
+  <data name="Mərtəbə" xml:space="preserve">
+    <value>Этаж</value>
+  </data>
+  <data name="Qiymət (AZN)" xml:space="preserve">
+    <value>Цена (AZN)</value>
+  </data>
+  <data name="Açar söz" xml:space="preserve">
+    <value>Ключевое слово</value>
+  </data>
+  <data name="axtar..." xml:space="preserve">
+    <value>поиск...</value>
+  </data>
+  <data name="Axtar" xml:space="preserve">
+    <value>Поиск</value>
+  </data>
+  <data name="Filtrləri sıfırla" xml:space="preserve">
+    <value>Сбросить фильтры</value>
+  </data>
+  <data name="elan tapıldı" xml:space="preserve">
+    <value>объявлений найдено</value>
+  </data>
+  <data name="Filtrlənib" xml:space="preserve">
+    <value>Отфильтровано</value>
+  </data>
+  <data name="Yeni Elan" xml:space="preserve">
+    <value>Новое объявление</value>
+  </data>
+  <data name="Elan tapılmadı" xml:space="preserve">
+    <value>Объявления не найдены</value>
+  </data>
+  <data name="Filtrləri dəyişin və ya ilk elanı siz yerləşdirin!" xml:space="preserve">
+    <value>Измените фильтры или добавьте первое объявление!</value>
+  </data>
+  <data name="Köhnə tikili" xml:space="preserve">
+    <value>Вторичка</value>
+  </data>
+  <data name="Yeni tikili" xml:space="preserve">
+    <value>Новостройка</value>
+  </data>
+  <data name="otaq" xml:space="preserve">
+    <value>комнат(а)</value>
+  </data>
+  <data name="mərtəbə" xml:space="preserve">
+    <value>этаж</value>
+  </data>
+  <data name="Ətraflı" xml:space="preserve">
+    <value>Подробнее</value>
+  </data>
+  <data name="min" xml:space="preserve">
+    <value>мин</value>
+  </data>
+  <data name="max" xml:space="preserve">
+    <value>макс</value>
+  </data>
+  <data name="Giriş etmək üçün hesabınıza daxil olun." xml:space="preserve">
+    <value>Войдите в свою учетную запись.</value>
+  </data>
+  <data name="Qeydiyyatdan keçmək üçün məlumatları daxil edin." xml:space="preserve">
+    <value>Введите данные для регистрации.</value>
+  </data>
+  <data name="evtap.az haqqında" xml:space="preserve">
+    <value>О evtap.az</value>
+  </data>
+  <data name="Bu sayt daha çox mənzil almaq istəyib, amma vaxtını saatlarla elan saytlarında itirməyənlər üçündür." xml:space="preserve">
+    <value>Этот сайт для тех, кто хочет купить квартиру, но не хочет тратить часы на сайтах объявлений.</value>
+  </data>
+  <data name="Tamamilə Pulsuz" xml:space="preserve">
+    <value>Совершенно бесплатно</value>
+  </data>
+  <data name="Elanınız reklam məqsədi ilə tam ödənişsiz şəkildə yayımlanacaq." xml:space="preserve">
+    <value>Ваше объявление будет опубликовано совершенно бесплатно в рекламных целях.</value>
+  </data>
+  <data name="Tam Nəzarət" xml:space="preserve">
+    <value>Полный контроль</value>
+  </data>
+  <data name="Elanınızı istədiyiniz vaxt dondura, yenidən aktivləşdirə və ya ləğv edə bilərsiniz." xml:space="preserve">
+    <value>Вы можете в любое время заморозить, повторно активировать или отменить свое объявление.</value>
+  </data>
+  <data name="Hər istifadəçinin öz kabineti var. Elanlarınızı asanlıqla idarə edin." xml:space="preserve">
+    <value>У каждого пользователя есть свой кабинет. Легко управляйте своими объявлениями.</value>
+  </data>
+  <data name="Dəqiq Məkan" xml:space="preserve">
+    <value>Точное местоположение</value>
+  </data>
+  <data name="Şəhər, rayon, qəsəbə, metro stansiyasına qədər dəqiqləşdirin." xml:space="preserve">
+    <value>Уточните город, район, поселок, до станции метро.</value>
+  </data>
+  <data name="Sürətli &amp; Rahat" xml:space="preserve">
+    <value>Быстро и удобно</value>
+  </data>
+  <data name="Saatlarla elan axtarmaq əvəzinə 2 dəqiqəyə öz elanınızı yerləşdirin." xml:space="preserve">
+    <value>Вместо долгих часов поиска, разместите свое объявление за 2 минуты.</value>
+  </data>
+  <data name="Necə işləyir?" xml:space="preserve">
+    <value>Как это работает?</value>
+  </data>
+  <data name="Qeydiyyatdan keçin" xml:space="preserve">
+    <value>Зарегистрируйтесь</value>
+  </data>
+  <data name="Pulsuz hesab açın" xml:space="preserve">
+    <value>Откройте бесплатный аккаунт</value>
+  </data>
+  <data name="Elan yerləşdirin" xml:space="preserve">
+    <value>Разместите объявление</value>
+  </data>
+  <data name="Axtardığınız evin kriteriyalarını daxil edin" xml:space="preserve">
+    <value>Введите критерии квартиры, которую вы ищете</value>
+  </data>
+  <data name="Gözləyin" xml:space="preserve">
+    <value>Ждите</value>
+  </data>
+  <data name="Əmlak sahibləri sizinlə əlaqə qursun" xml:space="preserve">
+    <value>Владельцы недвижимости свяжутся с вами</value>
+  </data>
+  <data name="Hemen Elan Yerləşdir →" xml:space="preserve">
+    <value>Разместить объявление сейчас →</value>
+  </data>
+  <data name="Öz kriteriyalarınızı daxil edin. Əmlak sahibləri və vasitəçilər bilavasitə sizinlə əlaqə qursun." xml:space="preserve">
+    <value>Введите свои критерии. Владельцы недвижимости и посредники свяжутся с вами напрямую.</value>
+  </data>
+  <data name="Elanı Təsdiqlə" xml:space="preserve">
+    <value>Подтвердить объявление</value>
+  </data>
+  <data name="Ləğv et" xml:space="preserve">
+    <value>Отменить</value>
+  </data>
+  <data name="Məlumat" xml:space="preserve">
+    <value>Информация</value>
+  </data>
+  <data name="Dondur" xml:space="preserve">
+    <value>Заморозить</value>
+  </data>
+  <data name="Aktivləşdir" xml:space="preserve">
+    <value>Активировать</value>
+  </data>
+  <data name="Sil" xml:space="preserve">
+    <value>Удалить</value>
+  </data>
+  <data name="Hesabınıza daxil olun" xml:space="preserve">
+    <value>Войдите в свой аккаунт</value>
+  </data>
+  <data name="İstifadəçi adı" xml:space="preserve">
+    <value>Имя пользователя</value>
+  </data>
+  <data name="istifadəçi adınız" xml:space="preserve">
+    <value>ваше имя пользователя</value>
+  </data>
+  <data name="Şifrə" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="Məni xatırla" xml:space="preserve">
+    <value>Запомнить меня</value>
+  </data>
+  <data name="Daxil ol →" xml:space="preserve">
+    <value>Войти →</value>
+  </data>
+  <data name="Hesabınız yoxdur?" xml:space="preserve">
+    <value>Нет аккаунта?</value>
+  </data>
+  <data name="← Ana Səhifəyə Qayıt" xml:space="preserve">
+    <value>← Вернуться на главную</value>
+  </data>
+  <data name="Qeydiyyatdan keç" xml:space="preserve">
+    <value>Зарегистрироваться</value>
+  </data>
+  <data name="Ad" xml:space="preserve">
+    <value>Имя</value>
+  </data>
+  <data name="Soyad" xml:space="preserve">
+    <value>Фамилия</value>
+  </data>
+  <data name="Şifrəni təkrarla" xml:space="preserve">
+    <value>Повторите пароль</value>
+  </data>
+  <data name="Artıq hesabınız var?" xml:space="preserve">
+    <value>Уже есть аккаунт?</value>
+  </data>
+</root>

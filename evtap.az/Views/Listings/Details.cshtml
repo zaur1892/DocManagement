@@ -1,0 +1,116 @@
+@model EvtapAz.Models.Listing
+@{
+    ViewData["Title"] = Model.ListingNumber;
+}
+
+<div class="main-container" style="max-width:780px">
+    <div style="margin-bottom:1rem">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-outline btn-sm">← Geri</a>
+    </div>
+
+    <div class="wizard-card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem">
+            <div>
+                <span class="listing-number" style="font-size:0.9rem">@Model.ListingNumber</span>
+                @if (Model.PropertyType != null)
+                {
+                    <span class="listing-type" style="font-size:0.9rem">@Model.PropertyType.Icon @Model.PropertyType.Name</span>
+                }
+            </div>
+            <span class="listing-date">📅 @Model.CreatedAt.ToString("dd MMMM yyyy")</span>
+        </div>
+
+        <h1 class="listing-location" style="font-size:1.4rem;margin-bottom:1.5rem">
+            📍 @Model.City.Name@(Model.District != null ? $", {Model.District.Name}" : "")@(Model.Settlement != null ? $", {Model.Settlement.Name}" : "")
+        </h1>
+
+        @if (Model.MetroStation != null)
+        {
+            <div style="margin-bottom:1rem">
+                <span class="metro-badge" style="background:@(Model.MetroStation.LineColor ?? "#555");font-size:0.9rem;padding:0.3rem 0.8rem">
+                    🚇 @Model.MetroStation.Name metrosu
+                </span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Address))
+        {
+            <p style="color:var(--text-muted);margin-bottom:1.5rem">🏠 @Model.Address</p>
+        }
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-bottom:1.5rem">
+            @if (Model.AreaMin.HasValue || Model.AreaMax.HasValue)
+            {
+                <div class="spec-tag" style="padding:1rem;border-radius:10px;background:#f0f4f8;flex-direction:column;align-items:flex-start;gap:0.3rem">
+                    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">Sahə</span>
+                    <span style="font-weight:700;font-size:1rem">@(Model.AreaMin?.ToString() ?? "?") — @(Model.AreaMax?.ToString() ?? "?") m²</span>
+                </div>
+            }
+            @if (Model.RoomMin.HasValue || Model.RoomMax.HasValue)
+            {
+                <div class="spec-tag" style="padding:1rem;border-radius:10px;background:#f0f4f8;flex-direction:column;align-items:flex-start;gap:0.3rem">
+                    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">Otaq sayı</span>
+                    <span style="font-weight:700;font-size:1rem">@(Model.RoomMin ?? Model.RoomMax) @(Model.RoomMax.HasValue && Model.RoomMax != Model.RoomMin ? "— " + Model.RoomMax : "") otaq</span>
+                </div>
+            }
+            @if (Model.FloorMin.HasValue || Model.FloorMax.HasValue)
+            {
+                <div class="spec-tag" style="padding:1rem;border-radius:10px;background:#f0f4f8;flex-direction:column;align-items:flex-start;gap:0.3rem">
+                    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">Mərtəbə</span>
+                    <span style="font-weight:700;font-size:1rem">@(Model.FloorMin ?? Model.FloorMax)@(Model.FloorMax.HasValue && Model.FloorMax != Model.FloorMin ? "—" + Model.FloorMax : "")-ci mərtəbə</span>
+                </div>
+            }
+            @if (Model.BuildingType != null)
+            {
+                <div class="spec-tag" style="padding:1rem;border-radius:10px;background:#f0f4f8;flex-direction:column;align-items:flex-start;gap:0.3rem">
+                    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">Bina növü</span>
+                    <span style="font-weight:700;font-size:1rem">@Model.BuildingType.Name @(Model.BuildingProject != null ? $"({Model.BuildingProject.Name})" : "")</span>
+                </div>
+            }
+            @if (Model.RepairType != null)
+            {
+                <div class="spec-tag" style="padding:1rem;border-radius:10px;background:#f0f4f8;flex-direction:column;align-items:flex-start;gap:0.3rem">
+                    <span style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase">Təmir</span>
+                    <span style="font-weight:700;font-size:1rem">@Model.RepairType.Name</span>
+                </div>
+            }
+        </div>
+
+        @if (Model.PriceMin.HasValue || Model.PriceMax.HasValue)
+        {
+            <div style="background:linear-gradient(135deg,#fff8ec,#fff3d4);border:1px solid #fde68a;border-radius:12px;padding:1.2rem;margin-bottom:1.5rem;text-align:center">
+                <div style="font-size:0.8rem;color:#92400e;font-weight:600;text-transform:uppercase;margin-bottom:0.3rem">Qiymət aralığı (Təqribi)</div>
+                <div class="listing-price" style="font-size:1.8rem;margin:0">
+                    @(Model.PriceMin.HasValue ? Model.PriceMin!.Value.ToString("N0") + " AZN" : "")
+                    @(Model.PriceMax.HasValue ? " — " + Model.PriceMax!.Value.ToString("N0") + " AZN" : "")
+                </div>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(Model.Notes))
+        {
+            <div style="background:#f8fafc;border-radius:10px;padding:1rem;margin-bottom:1.5rem;border-left:3px solid var(--primary)">
+                <div style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-bottom:0.4rem">QEYD</div>
+                <p>@Model.Notes</p>
+            </div>
+        }
+
+        <div style="background:var(--primary);color:#fff;border-radius:12px;padding:1.5rem">
+            <h3 style="margin-bottom:1rem;font-size:1rem;opacity:0.8">📞 Əlaqə Məlumatları</h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
+                <div>
+                    <div style="font-size:0.75rem;opacity:0.7;margin-bottom:0.2rem">Ad Soyad</div>
+                    <div style="font-weight:700">@Model.FullName</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem;opacity:0.7;margin-bottom:0.2rem">Telefon</div>
+                    <a href="tel:@Model.Phone" style="color:var(--accent);font-weight:700">@Model.Phone</a>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem;opacity:0.7;margin-bottom:0.2rem">Email</div>
+                    <a href="mailto:@Model.Email" style="color:var(--accent);font-weight:700">@Model.Email</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

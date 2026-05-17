@@ -1,0 +1,298 @@
+@model EvtapAz.Models.ListingViewModel
+@{
+    ViewData["Title"] = "Yeni Elan";
+    var cities = ViewBag.Cities as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var propTypes = ViewBag.PropertyTypes as List<EvtapAz.Models.PropertyType>;
+    var buildTypes = ViewBag.BuildingTypes as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var repairTypes = ViewBag.RepairTypes as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+    var metros = ViewBag.MetroStations as Microsoft.AspNetCore.Mvc.Rendering.SelectList;
+}
+
+<div class="wizard-container">
+    <h1 style="font-size:1.6rem;font-weight:800;color:var(--primary);margin-bottom:1.5rem;text-align:center">
+        Yeni Elan Yerləşdir
+    </h1>
+
+    <!-- Wizard Steps -->
+    <div class="wizard-steps">
+        <div class="wizard-step active" id="step-ind-1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Məkan</div>
+        </div>
+        <div class="wizard-step" id="step-ind-2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Bina</div>
+        </div>
+        <div class="wizard-step" id="step-ind-3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Mənzil</div>
+        </div>
+        <div class="wizard-step" id="step-ind-4">
+            <div class="step-circle">4</div>
+            <div class="step-label">Əlaqə</div>
+        </div>
+    </div>
+
+    <form asp-action="Create" method="post" id="listingForm">
+        @Html.AntiForgeryToken()
+
+        <!-- STEP 1: Məkan -->
+        <div class="wizard-card" id="step-1">
+            <h2>📍 Məkan Məlumatları</h2>
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label class="form-label">Şəhər / Rayon <span style="color:red">*</span></label>
+                <select asp-for="CityId" asp-items="cities" class="form-select" id="wiz-city" onchange="wizLoadDistricts(this.value)">
+                    <option value="">— Şəhər/Rayon seçin —</option>
+                </select>
+                <span asp-validation-for="CityId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem" id="wiz-districtGroup" style="display:none">
+                <label class="form-label">İnzibati Rayon</label>
+                <select asp-for="DistrictId" class="form-select" id="wiz-district" onchange="wizLoadSettlements(this.value)">
+                    <option value="">— Rayon seçin —</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem" id="wiz-settlementGroup" style="display:none">
+                <label class="form-label">Qəsəbə (ixtiyari)</label>
+                <select asp-for="SettlementId" class="form-select" id="wiz-settlement">
+                    <option value="">— Qəsəbə —</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem" id="wiz-metroGroup" style="display:none">
+                <label class="form-label">Yaxın Metro (ixtiyari)</label>
+                <select asp-for="MetroStationId" asp-items="metros" class="form-select" id="wiz-metro">
+                    <option value="">— Metro stansiyası —</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label class="form-label">Ünvan (ixtiyari)</label>
+                <input asp-for="Address" class="form-control" placeholder="küçə, ev nömrəsi..."/>
+            </div>
+
+            <div class="wizard-nav">
+                <div></div>
+                <button type="button" class="btn btn-primary" onclick="goStep(2)">Növbəti →</button>
+            </div>
+        </div>
+
+        <!-- STEP 2: Bina -->
+        <div class="wizard-card" id="step-2" style="display:none">
+            <h2>🏢 Bina Məlumatları</h2>
+
+            <div class="form-group" style="margin-bottom:1.2rem">
+                <label class="form-label">Mənzil Tipi <span style="color:red">*</span></label>
+                <div style="display:flex;flex-wrap:wrap;gap:0.7rem">
+                    @foreach (var pt in propTypes ?? new())
+                    {
+                        <label style="flex:1;min-width:130px;cursor:pointer">
+                            <input type="radio" asp-for="PropertyTypeId" value="@pt.Id" style="display:none" class="prop-radio"/>
+                            <div class="prop-type-btn" data-id="@pt.Id" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.8rem;text-align:center;transition:all 0.2s">
+                                <div style="font-size:1.5rem">@pt.Icon</div>
+                                <div style="font-size:0.85rem;font-weight:600;margin-top:0.3rem">@pt.Name</div>
+                            </div>
+                        </label>
+                    }
+                </div>
+                <span asp-validation-for="PropertyTypeId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Bina Növü</label>
+                    <select asp-for="BuildingTypeId" asp-items="buildTypes" class="form-select" onchange="toggleBuildingProject(this.value)">
+                        <option value="">— Seçin —</option>
+                    </select>
+                </div>
+                <div class="form-group" id="projectGroup" style="display:none">
+                    <label class="form-label">Proyekt</label>
+                    <select asp-for="BuildingProjectId" class="form-select" id="wiz-project">
+                        <option value="">— Proyekt —</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="wizard-nav">
+                <button type="button" class="btn btn-outline" onclick="goStep(1)">← Geri</button>
+                <button type="button" class="btn btn-primary" onclick="goStep(3)">Növbəti →</button>
+            </div>
+        </div>
+
+        <!-- STEP 3: Mənzil Məlumatları -->
+        <div class="wizard-card" id="step-3" style="display:none">
+            <h2>🏠 Mənzil Məlumatları</h2>
+
+            <div class="form-grid-2" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Sahə min (m²)</label>
+                    <input asp-for="AreaMin" class="form-control" type="number" placeholder="məs: 60"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Sahə max (m²)</label>
+                    <input asp-for="AreaMax" class="form-control" type="number" placeholder="məs: 100"/>
+                </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Otaq min</label>
+                    <input asp-for="RoomMin" class="form-control" type="number" placeholder="məs: 2"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Otaq max</label>
+                    <input asp-for="RoomMax" class="form-control" type="number" placeholder="məs: 3"/>
+                </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Mərtəbə min</label>
+                    <input asp-for="FloorMin" class="form-control" type="number" placeholder="məs: 3"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mərtəbə max</label>
+                    <input asp-for="FloorMax" class="form-control" type="number" placeholder="məs: 8"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Binadaki mərtəbə</label>
+                    <input asp-for="TotalFloors" class="form-control" type="number" placeholder="məs: 16"/>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label class="form-label">Təmir növü</label>
+                <select asp-for="RepairTypeId" asp-items="repairTypes" class="form-select">
+                    <option value="">— Fərq etməz —</option>
+                </select>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Qiymət min (AZN, təqribi)</label>
+                    <input asp-for="PriceMin" class="form-control" type="number" placeholder="məs: 50000"/>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Qiymət max (AZN, təqribi)</label>
+                    <input asp-for="PriceMax" class="form-control" type="number" placeholder="məs: 100000"/>
+                </div>
+            </div>
+
+            <div class="wizard-nav">
+                <button type="button" class="btn btn-outline" onclick="goStep(2)">← Geri</button>
+                <button type="button" class="btn btn-primary" onclick="goStep(4)">Növbəti →</button>
+            </div>
+        </div>
+
+        <!-- STEP 4: Əlaqə -->
+        <div class="wizard-card" id="step-4" style="display:none">
+            <h2>📞 Əlaqə Məlumatları</h2>
+
+            <div class="alert alert-info">
+                🔒 Əlaqə məlumatlarınız yalnız elanınıza baxan şəxslərə göstəriləcək.
+            </div>
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label class="form-label">Ad Soyad <span style="color:red">*</span></label>
+                <input asp-for="FullName" class="form-control" placeholder="Ad Soyad"/>
+                <span asp-validation-for="FullName" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-grid-2" style="margin-bottom:1rem">
+                <div class="form-group">
+                    <label class="form-label">Email <span style="color:red">*</span></label>
+                    <input asp-for="Email" class="form-control" type="email" placeholder="email@example.com"/>
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Telefon <span style="color:red">*</span></label>
+                    <input asp-for="Phone" class="form-control" placeholder="+994 50 XXX XX XX"/>
+                    <span asp-validation-for="Phone" class="field-validation-error"></span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem">
+                <label class="form-label">Qeyd (ixtiyari)</label>
+                <textarea asp-for="Notes" class="form-control" rows="4" placeholder="Əlavə tələblərinizi yazın..."></textarea>
+            </div>
+
+            <div class="wizard-nav">
+                <button type="button" class="btn btn-outline" onclick="goStep(3)">← Geri</button>
+                <button type="submit" class="btn btn-accent btn-lg">✅ Elanı Yerləşdir</button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<style>
+.prop-radio:checked + .prop-type-btn,
+.prop-type-btn.selected {
+    border-color: var(--primary) !important;
+    background: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(30,58,95,0.15);
+}
+.prop-type-btn:hover { border-color: var(--primary-light) !important; }
+</style>
+
+<script>
+function goStep(n) {
+    for (let i = 1; i <= 4; i++) {
+        document.getElementById('step-' + i).style.display = i === n ? '' : 'none';
+        const ind = document.getElementById('step-ind-' + i);
+        ind.classList.remove('active', 'done');
+        if (i < n) ind.classList.add('done');
+        if (i === n) ind.classList.add('active');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Property type selection
+document.querySelectorAll('.prop-radio').forEach(r => {
+    r.addEventListener('change', () => {
+        document.querySelectorAll('.prop-type-btn').forEach(b => b.classList.remove('selected'));
+        r.nextElementSibling.classList.add('selected');
+    });
+});
+
+async function toggleBuildingProject(typeId) {
+    const group = document.getElementById('projectGroup');
+    const sel = document.getElementById('wiz-project');
+    if (!typeId) { group.style.display = 'none'; return; }
+    const res = await fetch('/Listings/GetBuildingProjects?buildingTypeId=' + typeId);
+    const data = await res.json();
+    sel.innerHTML = '<option value="">— Proyekt —</option>';
+    data.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.name}</option>`);
+    group.style.display = data.length ? '' : 'none';
+}
+
+async function wizLoadDistricts(cityId) {
+    const dg = document.getElementById('wiz-districtGroup');
+    const mg = document.getElementById('wiz-metroGroup');
+    const ds = document.getElementById('wiz-district');
+    const ms = document.getElementById('wiz-metro');
+    document.getElementById('wiz-settlementGroup').style.display = 'none';
+    if (!cityId) { dg.style.display = 'none'; mg.style.display = 'none'; return; }
+    const res = await fetch('/Listings/GetDistricts?cityId=' + cityId);
+    const data = await res.json();
+    ds.innerHTML = '<option value="">— Rayon seçin —</option>';
+    data.forEach(d => ds.innerHTML += `<option value="${d.id}">${d.name}</option>`);
+    dg.style.display = data.length ? '' : 'none';
+    // Show metro only for Baku (cityId=1)
+    mg.style.display = (cityId == 1) ? '' : 'none';
+}
+
+async function wizLoadSettlements(districtId) {
+    const sg = document.getElementById('wiz-settlementGroup');
+    const ss = document.getElementById('wiz-settlement');
+    if (!districtId) { sg.style.display = 'none'; return; }
+    const res = await fetch('/Listings/GetSettlements?districtId=' + districtId);
+    const data = await res.json();
+    ss.innerHTML = '<option value="">— Qəsəbə —</option>';
+    data.forEach(s => ss.innerHTML += `<option value="${s.id}">${s.name}</option>`);
+    sg.style.display = data.length ? '' : 'none';
+}
+</script>

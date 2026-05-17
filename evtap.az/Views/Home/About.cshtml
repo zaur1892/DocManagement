@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "Haqqında";
+}
+
+<section class="about-hero">
+    <h1>@Localizer["evtap.az haqqında"]</h1>
+    <p>@Localizer["Bu sayt daha çox mənzil almaq istəyib, amma vaxtını saatlarla elan saytlarında itirməyənlər üçündür."]</p>
+</section>
+
+<div class="main-container">
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🏠</div>
+            <h3>@Localizer["mənzil sizi axtarır"]</h3>
+            <p>@Localizer["Öz kriteriyalarınızı daxil edin. Əmlak sahibləri və vasitəçilər bilavasitə sizinlə əlaqə qursun."]</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💸</div>
+            <h3>@Localizer["Tamamilə Pulsuz"]</h3>
+            <p>@Localizer["Elanınız reklam məqsədi ilə tam ödənişsiz şəkildə yayımlanacaq."]</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⏸️</div>
+            <h3>@Localizer["Tam Nəzarət"]</h3>
+            <p>@Localizer["Elanınızı istədiyiniz vaxt dondura, yenidən aktivləşdirə və ya ləğv edə bilərsiniz."]</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>@Localizer["Şəxsi Kabinet"]</h3>
+            <p>@Localizer["Hər istifadəçinin öz kabineti var. Elanlarınızı asanlıqla idarə edin."]</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">📍</div>
+            <h3>@Localizer["Dəqiq Məkan"]</h3>
+            <p>@Localizer["Şəhər, rayon, qəsəbə, metro stansiyasına qədər dəqiqləşdirin."]</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3>@Localizer["Sürətli & Rahat"]</h3>
+            <p>@Localizer["Saatlarla elan axtarmaq əvəzinə 2 dəqiqəyə öz elanınızı yerləşdirin."]</p>
+        </div>
+    </div>
+
+    <div style="background:#fff;border-radius:16px;padding:3rem;text-align:center;box-shadow:0 4px 24px rgba(30,58,95,0.10);border:1px solid #e2e8f0;margin-bottom:2rem">
+        <h2 style="font-size:1.8rem;color:#1E3A5F;margin-bottom:1rem">@Localizer["Necə işləyir?"]</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:2rem;margin-top:2rem;text-align:left">
+            <div style="display:flex;gap:1rem;align-items:flex-start">
+                <div style="width:36px;height:36px;border-radius:50%;background:#1E3A5F;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">1</div>
+                <div><strong>@Localizer["Qeydiyyatdan keçin"]</strong><p style="color:#6b7c93;font-size:0.9rem;margin-top:0.3rem">@Localizer["Pulsuz hesab açın"]</p></div>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:flex-start">
+                <div style="width:36px;height:36px;border-radius:50%;background:#1E3A5F;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">2</div>
+                <div><strong>@Localizer["Elan yerləşdirin"]</strong><p style="color:#6b7c93;font-size:0.9rem;margin-top:0.3rem">@Localizer["Axtardığınız evin kriteriyalarını daxil edin"]</p></div>
+            </div>
+            <div style="display:flex;gap:1rem;align-items:flex-start">
+                <div style="width:36px;height:36px;border-radius:50%;background:#F4A92A;color:#1E3A5F;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">3</div>
+                <div><strong>@Localizer["Gözləyin"]</strong><p style="color:#6b7c93;font-size:0.9rem;margin-top:0.3rem">@Localizer["Əmlak sahibləri sizinlə əlaqə qursun"]</p></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center;padding:2rem 0">
+        <a asp-controller="Listings" asp-action="Create" class="btn btn-accent btn-lg">@Localizer["Hemen Elan Yerləşdir →"]</a>
+    </div>
+</div>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — evtap.az</title>
+    <meta name="description" content="evtap.az — Siz mənzili deyil, mənzil sizi axtarır. Ev almaq istəyənlər üçün pulsuz elan platforması." />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="navbar-brand" asp-controller="Home" asp-action="Index">evtap<span>.az</span></a>
+
+    <ul class="navbar-nav">
+        <li><a class="nav-link" asp-controller="Home" asp-action="Index">@Localizer["Ana Səhifə"]</a></li>
+        <li><a class="nav-link" asp-controller="Home" asp-action="About">@Localizer["Haqqında"]</a></li>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <li><a class="nav-link btn-nav-primary" asp-controller="Listings" asp-action="Create">+ @Localizer["Yeni Elan Yerləşdir"]</a></li>
+            <li><a class="nav-link" asp-controller="Listings" asp-action="MyListings">@Localizer["Şəxsi Kabinet"]</a></li>
+            <li>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="nav-link" style="background:none;border:none;cursor:pointer;color:rgba(255,255,255,0.85);font-family:inherit;font-size:0.92rem;font-weight:500;padding:0.45rem 0.9rem;border-radius:8px;">@Localizer["Çıxış"]</button>
+                </form>
+            </li>
+        }
+        else
+        {
+            <li><a class="nav-link btn-nav-primary" asp-controller="Listings" asp-action="Create">+ @Localizer["Yeni Elan Yerləşdir"]</a></li>
+            <li><a class="nav-link" asp-controller="Account" asp-action="Login">@Localizer["Giriş"]</a></li>
+        }
+
+        <li>
+            <div class="lang-switcher">
+                <form asp-controller="Home" asp-action="SetLanguage" method="post" style="display:contents">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                    <button type="submit" name="culture" value="az" class="lang-btn @(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "az" ? "active" : "")">AZ</button>
+                    <button type="submit" name="culture" value="ru" class="lang-btn @(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ru" ? "active" : "")">RU</button>
+                    <button type="submit" name="culture" value="en" class="lang-btn @(System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "en" ? "active" : "")">EN</button>
+                </form>
+            </div>
+        </li>
+    </ul>
+</nav>
+
+@if (TempData["Success"] != null)
+{
+    <div style="max-width:1200px;margin:1rem auto;padding:0 1.5rem">
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div style="max-width:1200px;margin:1rem auto;padding:0 1.5rem">
+        <div class="alert alert-danger">❌ @TempData["Error"]</div>
+    </div>
+}
+
+@RenderBody()
+
+<footer class="footer">
+    <p>© @DateTime.Now.Year <a href="/">evtap.az</a> — @Localizer["Siz mənzili deyil,"] @Localizer["mənzil sizi axtarır"] 🏠</p>
+</footer>
+
+<script src="~/js/location.js" asp-append-version="true"></script>
+<script src="~/js/listing-wizard.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

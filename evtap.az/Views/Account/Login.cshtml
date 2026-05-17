@@ -1,0 +1,64 @@
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<EvtapAz.SharedResource> Localizer
+@model EvtapAz.Models.LoginViewModel
+@{
+    ViewData["Title"] = Localizer["Giriş"];
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>@Localizer["Giriş"] — evtap.az</title>
+    <link rel="stylesheet" href="~/css/site.css"/>
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <h1>evtap<span>.az</span></h1>
+            <p>@Localizer["Hesabınıza daxil olun"]</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                @Html.ValidationSummary(false, "", new { @class = "" })
+            </div>
+        }
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl"/>
+
+            <div class="form-group" style="margin-bottom:1rem">
+                <label class="form-label">@Localizer["İstifadəçi adı"]</label>
+                <input asp-for="UserName" class="form-control" placeholder="@Localizer["istifadəçi adınız"]"/>
+                <span asp-validation-for="UserName" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom:1.5rem">
+                <label class="form-label">@Localizer["Şifrə"]</label>
+                <input asp-for="Password" class="form-control" placeholder="••••••" type="password"/>
+                <span asp-validation-for="Password" class="field-validation-error"></span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem">
+                <input asp-for="RememberMe" type="checkbox" id="rememberMe"/>
+                <label for="rememberMe" style="font-size:0.88rem;cursor:pointer">@Localizer["Məni xatırla"]</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%">@Localizer["Daxil ol →"]</button>
+        </form>
+
+        <div class="auth-footer">
+            @Localizer["Hesabınız yoxdur?"] <a asp-action="Register">@Localizer["Qeydiyyatdan keçin"]</a>
+        </div>
+        <div class="auth-footer" style="margin-top:0.5rem">
+            <a asp-controller="Home" asp-action="Index">@Localizer["← Ana Səhifəyə Qayıt"]</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
