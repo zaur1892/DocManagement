@@ -1,0 +1,37 @@
+@model DocManagement.Models.InventoryType
+@{ ViewData["Title"] = "İnventar Tipi Redaktə"; }
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5><i class="bi bi-pencil-square me-2"></i>İnventar Tipi Redaktə</h5>
+    <a asp-controller="Settings" asp-action="Index" asp-route-tab="invtypes" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Geri
+    </a>
+</div>
+<div class="card shadow-sm" style="max-width:500px">
+    <div class="card-body">
+        <form asp-controller="Settings" asp-action="EditInventoryType" method="post">
+            <input type="hidden" asp-for="Id" />
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label fw-bold">Tip Adı</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger small"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Action" class="form-label fw-bold">İnventar Əməliyyatı</label>
+                <select asp-for="Action" class="form-select">
+                    <option value="0">0 — Təsir Etmir (Təmir, Texniki Baxış...)</option>
+                    <option value="1">1 — Mədaxil (inventara YENİ məhsul əlavə olunur)</option>
+                    <option value="2">2 — Yerdəyişmə (mövcud məhsulun Məkan/IP-si yenilənir)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label">Açıqlama (istəyə görə)</label>
+                <input asp-for="Description" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="bi bi-check-lg me-1"></i> Yadda Saxla
+            </button>
+        </form>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

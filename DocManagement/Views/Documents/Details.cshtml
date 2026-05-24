@@ -1,18 +1,16 @@
-﻿@model List<DocumentAuditViewModel>
+@model List<DocumentAuditViewModel>
 
 @{
     var first = Model.First();
 }
 
-
 <div class="d-flex justify-content-end mb-3">
     <a asp-action="DetailsPdf"
-       asp-route-id="@Model.First().DocumentId"
+       asp-route-id="@first.DocumentId"
        class="btn btn-danger">
         PDF-ə ixrac et
     </a>
 </div>
-
 
 <div class="a4">
     <h3 class="text-center">SƏNƏD TARİXÇƏSİ</h3>
@@ -23,7 +21,6 @@
         <strong>Qeyd:</strong> @(string.IsNullOrWhiteSpace(first.Note) ? "-" : first.Note)
     </p>
 
-
     <hr />
     <h5>Dəyişikliklər</h5>
 
@@ -33,11 +30,21 @@
                 <th>Sahə</th>
                 <th>Köhnə</th>
                 <th>Yeni</th>
-                <th>Dəyişən</th>
+                <th>Dəyişən / Əlavə edən</th>
                 <th>Tarix</th>
             </tr>
         </thead>
         <tbody>
+            @* Show the initial Insert record *@
+            <tr>
+                <td><strong>Sənəd Əlavə Edildi</strong></td>
+                <td>-</td>
+                <td>-</td>
+                <td>@(first.CreatedByUserName ?? first.EditedByUserName)</td>
+                <td>@first.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+            </tr>
+
+            @* Loop through updates *@
             @for (int i = 1; i < Model.Count; i++)
             {
                 var prev = Model[i - 1];
@@ -98,6 +105,27 @@
                     </tr>
                 }
 
+                if (prev.Location != curr.Location)
+                {
+                    <tr>
+                        <td>Məkan (Location)</td>
+                        <td>@(prev.Location ?? "-")</td>
+                        <td>@(curr.Location ?? "-")</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
+
+                if (prev.IpAddress != curr.IpAddress)
+                {
+                    <tr>
+                        <td>IP Address</td>
+                        <td>@(prev.IpAddress ?? "-")</td>
+                        <td>@(curr.IpAddress ?? "-")</td>
+                        <td>@curr.EditedByUserName</td>
+                        <td>@curr.LogInsertDateTime.ToString("dd.MM.yyyy HH:mm")</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

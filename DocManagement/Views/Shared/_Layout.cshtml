@@ -1,4 +1,4 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @inject UserManager<IdentityUser> UserManager
 @inject SignInManager<IdentityUser> SignInManager
 
@@ -9,26 +9,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Sənəd İdarəetmə</title>
 
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Select2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <!-- Site CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 
 <body>
+
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-light border-bottom py-1">
             <div class="container-fluid">
 
-                <!-- LOGO – ESAS SƏNƏDLƏR -->
-                <a class="navbar-brand"
+                <a class="navbar-brand fw-bold"
                    asp-controller="Documents"
                    asp-action="Index">
-                    Sənəd İdarəetmə
+                    📄 Sənədlər
                 </a>
 
                 <button class="navbar-toggler" type="button"
@@ -37,34 +34,56 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                <div class="navbar-collapse collapse">
 
-                        <!-- ANA SƏHİFƏ – ESAS SƏNƏDLƏR -->
+                    <ul class="navbar-nav me-auto">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-controller="Documents"
+                            <a class="nav-link py-1 fw-bold text-primary"
+                               asp-controller="Home"
                                asp-action="Index">
-                                Ana Səhifə
+                                📊 Dashboard
                             </a>
                         </li>
 
-                        <!-- MƏXFİLİK -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark"
+                            <a class="nav-link py-1"
+                               asp-controller="Documents"
+                               asp-action="Index">
+                                Ana səhifə
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link py-1"
+                               asp-controller="Equipments"
+                               asp-action="Inventory">
+                                📦 İnventar
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link py-1"
                                asp-controller="Home"
                                asp-action="Privacy">
                                 Məxfilik
                             </a>
                         </li>
+
                     </ul>
 
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-center">
+
+                        <!-- SAAT + HƏFTƏNİN GÜNÜ -->
+                        <li class="nav-item me-3">
+                            <span id="dateTimeAz" class="nav-link py-1 fw-bold"></span>
+                        </li>
+
                         @if (SignInManager.IsSignedIn(User))
                         {
                             <li class="nav-item">
-                                <span class="nav-link text-dark">
-                                    Salam, @UserManager.GetUserName(User)!
+                                <span class="nav-link py-1">
+                                    👤 @UserManager.GetUserName(User)
                                 </span>
                             </li>
 
@@ -74,10 +93,10 @@
                             if (roles.Contains("Admin"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark"
-                                       asp-controller="Account"
-                                       asp-action="Register">
-                                        İstifadəçi əlavə et
+                                    <a class="nav-link py-1"
+                                       asp-controller="Settings"
+                                       asp-action="Index">
+                                        ⚙️ Sazlamalar
                                     </a>
                                 </li>
                             }
@@ -87,39 +106,76 @@
                                       asp-action="Logout"
                                       method="post">
                                     <button type="submit"
-                                            class="nav-link btn btn-link text-dark">
-                                        Çıxış
+                                            class="btn btn-link nav-link py-1">
+                                        🚪 Çıxış
                                     </button>
                                 </form>
                             </li>
                         }
+
                     </ul>
+
                 </div>
             </div>
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div class="container-fluid mt-2">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            © 2025 – Sənəd İdarəetmə Sistemi
-        </div>
+
+    <footer class="border-top text-muted small text-center py-1">
+        © 2025 Sənəd İdarəetmə
     </footer>
 
-    <!-- jQuery -->
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
-    <!-- Bootstrap -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Select2 JS -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <script>
+
+        function updateDateTimeAz(){
+
+        const now = new Date();
+
+        const days = [
+        "Bazar",
+        "Bazar ertəsi",
+        "Çərşənbə axşamı",
+        "Çərşənbə",
+        "Cümə axşamı",
+        "Cümə",
+        "Şənbə"
+        ];
+
+        const day = now.getDate().toString().padStart(2,'0');
+        const month = (now.getMonth()+1).toString().padStart(2,'0');
+        const year = now.getFullYear();
+
+        const hours = now.getHours().toString().padStart(2,'0');
+        const minutes = now.getMinutes().toString().padStart(2,'0');
+
+        const text =
+        "📅 " + day + "." + month + "." + year +
+        " | 🕒 " + hours + ":" + minutes +
+        " | " + days[now.getDay()];
+
+        document.getElementById("dateTimeAz").innerText = text;
+
+        }
+
+        updateDateTimeAz();
+        setInterval(updateDateTimeAz,1000);
+
+    </script>
+
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

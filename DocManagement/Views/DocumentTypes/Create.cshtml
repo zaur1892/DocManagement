@@ -1,0 +1,17 @@
+@model DocManagement.Models.DocumentType
+@{
+    ViewData["Title"] = "Yeni Tələbnamə Tipi";
+}
+<form asp-controller="Settings" asp-action="CreateDocumentType" method="post">
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label fw-bold">Tip Adı</label>
+        <input asp-for="Name" class="form-control" placeholder="Məs: Alış, Baxış, Quraşdırma..." />
+        <span asp-validation-for="Name" class="text-danger small"></span>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Əlavə Et
+    </button>
+    <a asp-controller="Settings" asp-action="Index" asp-route-tab="doctypes" class="btn btn-outline-secondary btn-sm ms-2">
+        <i class="bi bi-x me-1"></i> Ləğv et
+    </a>
+</form>

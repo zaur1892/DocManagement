@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using DocManagement.Data;
 using DocManagement.Models;
 using DocumentFormat.OpenXml.InkML;
@@ -106,8 +106,8 @@ namespace DocManagement.Controllers
         var query = _context.Documents
             .Include(d => d.DocumentType)
             .Include(d => d.DocumentStatus)
-            .Include(d => d.Zone)
-            .Include(d => d.Equipment)
+            .Include(d => d.Items)
+            .ThenInclude(i => i.Equipment)
             .Where(d =>
                 d.CreatedAt.Date >= startDate.Value.Date &&
                 d.CreatedAt.Date <= endDate.Value.Date);
@@ -146,8 +146,8 @@ namespace DocManagement.Controllers
             ws.Cell(row, 2).Value = d.DocumentType?.Name;
             ws.Cell(row, 3).Value = d.CreatedAt;
             ws.Cell(row, 4).Value = d.DocumentStatus?.Name;
-            ws.Cell(row, 5).Value = d.Zone?.Name;
-            ws.Cell(row, 6).Value = d.Equipment?.Name;
+            ws.Cell(row, 5).Value = string.Join(", ", d.Items.Select(i => i.Location).Distinct());
+            ws.Cell(row, 6).Value = string.Join(", ", d.Items.Select(i => i.Equipment?.Name));
             ws.Cell(row, 7).Value = d.Note;
 
             row++;
@@ -188,11 +188,7 @@ namespace DocManagement.Controllers
     [Authorize(Roles = "Admin,User")]
         public IActionResult Create()
         {
-            ViewBag.StatusList = new SelectList(_context.DocumentStatus, "Id", "Name");
-            ViewBag.ZoneList = new SelectList(_context.Zones, "Id", "Name");
-            ViewBag.EquipmentList = new SelectList(_context.Equipments, "Id", "Name");
-
-        LoadAllCombos();
+            LoadAllCombos();
             return View();
         }
 
@@ -206,17 +202,25 @@ namespace DocManagement.Controllers
             if (!ModelState.IsValid)
             {
                 LoadAllCombos(
-                    document.DocumentTypeId,
-                    document.ZoneId,
-                    document.EquipmentId
+                    document.DocumentTypeId
                 );
                 return View(document);
             }
+
+            // Note: DocumentItems are handled via form binding if named correctly.
 
             document.CreatedAt = DateTime.Now;
             document.UserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             _context.Documents.Add(document);
+            _context.SaveChanges(); // Əvvəlcə yaz ki, Items-lər DocumentId alsın
+
+            // İnventarla sinxronizasiya (SaveChanges-dən SONRA)
+            var savedDoc = _context.Documents
+                .Include(d => d.Items)
+                .Include(d => d.DocumentStatus)
+                .FirstOrDefault(d => d.Id == document.Id);
+            if (savedDoc != null) SyncInventory(savedDoc);
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
@@ -231,14 +235,14 @@ public IActionResult Edit(int? id)
     if (id == null)
         return NotFound();
 
-    var document = _context.Documents.FirstOrDefault(d => d.Id == id);
+    var document = _context.Documents
+        .Include(d => d.Items)
+        .FirstOrDefault(d => d.Id == id);
     if (document == null)
         return NotFound();
 
     LoadAllCombos(
-        document.DocumentTypeId,
-        document.ZoneId,
-        document.EquipmentId
+        document.DocumentTypeId
     );
 
     return View(document);
@@ -257,24 +261,79 @@ public IActionResult Edit(int? id)
             if (!ModelState.IsValid)
             {
                 LoadAllCombos(
-                    document.DocumentTypeId,
-                    document.ZoneId,
-                    document.EquipmentId
+                    document.DocumentTypeId
                 );
                 return View(document);
             }
 
-            var dbDocument = _context.Documents.FirstOrDefault(d => d.Id == id);
+            var dbDocument = _context.Documents
+                .Include(d => d.Items)
+                .FirstOrDefault(d => d.Id == id);
             if (dbDocument == null)
                 return NotFound();
 
+            // 🗑️ Əvvəlki inventar qeydlərini HƏMİŞƏN təmizlə (tip dəyişsə də, dəyişməsə də)
+            // Beləliklə duplicate əmələ gəlmir
+            var currentInvType = dbDocument.InventoryTypeId.HasValue
+                ? _context.InventoryTypes.FirstOrDefault(t => t.Id == dbDocument.InventoryTypeId)
+                : null;
+
+            if (currentInvType != null && currentInvType.Action == 1)
+            {
+                var inventories = _context.Inventories.ToList();
+                
+                // İlk növbədə bu sənədə (DocumentId) bağlı olanları tapıb silirik (ən etibarlı yol)
+                var exactMatches = inventories.Where(i => i.DocumentId == dbDocument.Id).ToList();
+                if (exactMatches.Any())
+                {
+                    _context.Inventories.RemoveRange(exactMatches);
+                    foreach (var m in exactMatches) inventories.Remove(m);
+                }
+                else
+                {
+                    // Köhnə sənədlər üçün fallback (DocumentId olmayanlar)
+                    foreach (var oldItem in dbDocument.Items.Where(i => i.EquipmentId > 0))
+                    {
+                        Inventory? invToRemove = null;
+                        if (!string.IsNullOrWhiteSpace(oldItem.SerialNumber))
+                            invToRemove = inventories.FirstOrDefault(inv => inv.SerialNumber == oldItem.SerialNumber && inv.DocumentId == null);
+                        
+                        if (invToRemove == null)
+                            invToRemove = inventories.FirstOrDefault(inv => inv.EquipmentId == oldItem.EquipmentId && inv.DocumentId == null);
+
+                        if (invToRemove != null)
+                        {
+                            _context.Inventories.Remove(invToRemove);
+                            inventories.Remove(invToRemove);
+                        }
+                    }
+                }
+            }
+
             // 🔴 SAHƏLƏR
-            //dbDocument.Title = document.Title;
             dbDocument.DocumentTypeId = document.DocumentTypeId;
             dbDocument.DocumentStatusId = document.DocumentStatusId;
             dbDocument.ZoneId = document.ZoneId;
-            dbDocument.EquipmentId = document.EquipmentId;
             dbDocument.Note = document.Note;
+            dbDocument.InventoryTypeId = document.InventoryTypeId;
+
+            // Mövcud itemləri sil, yenilərini əlavə et
+            _context.DocumentItems.RemoveRange(dbDocument.Items);
+            dbDocument.Items.Clear();
+
+            if (document.Items != null && document.Items.Any())
+            {
+                var validItems = document.Items.Where(i => i.EquipmentId > 0).ToList();
+                foreach (var item in validItems)
+                {
+                    item.Id = 0;
+                    item.DocumentId = dbDocument.Id;
+                    dbDocument.Items.Add(item);
+                }
+            }
+
+            // Yeni InventoryType-a görə inventarı sinxronlaşdır
+            SyncInventory(dbDocument);
 
             // Audit
             dbDocument.EditedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -314,6 +373,21 @@ public IActionResult Edit(int? id)
             // 🔴 HARD DELETE YOX
             document.DocumentStatusId = 0; // STATUS = 0
             _context.Documents.Update(document);
+            
+            // Əgər Mədaxildirsə (Action=1), onun yaratdığı inventarları da bazadan silək!
+            var invType = document.InventoryTypeId.HasValue 
+                ? _context.InventoryTypes.FirstOrDefault(t => t.Id == document.InventoryTypeId) 
+                : null;
+                
+            if (invType != null && invType.Action == 1)
+            {
+                var invsToRemove = _context.Inventories.Where(i => i.DocumentId == document.Id).ToList();
+                if (invsToRemove.Any())
+                {
+                    _context.Inventories.RemoveRange(invsToRemove);
+                }
+            }
+
             _context.SaveChanges();
 
             return RedirectToAction(nameof(Index));
@@ -336,7 +410,7 @@ public IActionResult Edit(int? id)
 
 
         // Helper
-        private void LoadAllCombos(int? selectedDocumentTypeId = null, int? selectedZoneId = null, int? selectedEquipmentId = null)
+        private void LoadAllCombos(int? selectedDocumentTypeId = null)
         {
             ViewBag.StatusList = new SelectList(
                 _context.DocumentStatus.OrderBy(x => x.Name),
@@ -347,26 +421,111 @@ public IActionResult Edit(int? id)
             ViewBag.ZoneList = new SelectList(
                 _context.Zones.Where(z => z.Status == 1).OrderBy(z => z.Name),
                 "Id",
-                "Name",
-                selectedZoneId
+                "Name"
             );
 
             ViewBag.EquipmentList = new SelectList(
                 _context.Equipments.Where(e => e.Status == 1).OrderBy(e => e.Name),
                 "Id",
-                "Name",
-                selectedEquipmentId
+                "Name"
             );
 
-            // 🔴 DOCUMENT TYPE (Tələbnamə tipi)
             ViewBag.DocumentTypeList = new SelectList(
                 _context.DocumentTypes.OrderBy(x => x.Name),
                 "Id",
                 "Name",
                 selectedDocumentTypeId
             );
+
+            // 📦 INVENTORY TYPE (Tələbnamə İnventar Tipi)
+            ViewBag.InventoryTypeList = new SelectList(
+                _context.InventoryTypes.OrderBy(x => x.Name),
+                "Id",
+                "Name"
+            );
         }
 
+         private void SyncInventory(Document document)
+        {
+            // 🛑 STATUS YOXLAMASI: Yalnız Tamamlanıb olduqda inventara təsir et!
+            var completedStatusCodeSetting = _context.AppSettings.FirstOrDefault(x => x.Key == "CompletedStatusCode")?.Value;
+            bool isCompleted = false;
+            
+            var status = document.DocumentStatus ?? _context.DocumentStatus.FirstOrDefault(s => s.Id == document.DocumentStatusId);
+            if (status != null && (status.Name == completedStatusCodeSetting || status.Id == 3))
+            {
+                isCompleted = true;
+            }
+            
+            if (!isCompleted) return;
+
+            // InventoryType-a bax
+            if (document.InventoryTypeId == null) return;
+            var invType = _context.InventoryTypes.FirstOrDefault(t => t.Id == document.InventoryTypeId);
+            if (invType == null || invType.Action == 0) return; // 0: Təsir Etmir
+
+            if (document.Items == null || !document.Items.Any()) return;
+
+            // Action=1: SerialNumber olmasa da işləyir
+            // Action=2: SerialNumber mütləq lazımdır (əslində serial yoxdursa da işləyir)
+            var validItems = invType.Action == 1
+                ? document.Items.Where(i => i.EquipmentId > 0).ToList()
+                : document.Items.Where(i => i.EquipmentId > 0 && !string.IsNullOrWhiteSpace(i.SerialNumber)).ToList();
+
+            // Əgər Action=2 (Yerdəyişmə) üçün serial yoxdursa belə dəyişməyə icazə vermək istəyiriksə:
+            if (invType.Action == 2) 
+                validItems = document.Items.Where(i => i.EquipmentId > 0).ToList();
+
+            // Bütün inventarları yaddaşa yükləyirik ki, duplikat yoxlaması düzgün işləsin
+            var inventories = _context.Inventories.Local.Any() 
+                ? _context.Inventories.Local.ToList() 
+                : _context.Inventories.ToList();
+
+            foreach (var item in validItems)
+            {
+                int qty = item.Qty > 0 ? item.Qty : 1;
+
+                if (invType.Action == 1) // 1: Mədaxil (Alış)
+                {
+                    for (int i = 0; i < qty; i++)
+                    {
+                        // Mədaxil həmişə İNVENTARA YENİDƏN ƏLAVƏ EDİR
+                        var newInv = new Inventory
+                        {
+                            EquipmentId = item.EquipmentId,
+                            SerialNumber = item.SerialNumber,
+                            Model = item.Model,
+                            CurrentLocation = item.Location,
+                            CurrentIpAddress = item.IpAddress,
+                            Status = "İstifadədə",
+                            DocumentId = document.Id
+                        };
+                        _context.Inventories.Add(newInv);
+                        inventories.Add(newInv); 
+                    }
+                }
+                else if (invType.Action == 2) // 2: Yerдəyişmə
+                {
+                    for (int i = 0; i < qty; i++)
+                    {
+                        Inventory? existingInv = null;
+                        if (!string.IsNullOrWhiteSpace(item.SerialNumber))
+                            existingInv = inventories.FirstOrDefault(inv => inv.SerialNumber == item.SerialNumber);
+                        
+                        if (existingInv == null)
+                            existingInv = inventories.FirstOrDefault(inv => inv.EquipmentId == item.EquipmentId);
+
+                        if (existingInv != null)
+                        {
+                            existingInv.CurrentLocation = item.Location ?? existingInv.CurrentLocation;
+                            existingInv.CurrentIpAddress = item.IpAddress ?? existingInv.CurrentIpAddress;
+                            _context.Inventories.Update(existingInv);
+                            inventories.Remove(existingInv); // Bir dəfə yerdəyişmə edildisə, eyni obyekti təkrar tapmasın deyə çıxarırıq
+                        }
+                    }
+                }
+            }
+        }
 
         public IActionResult DetailsPdf(int id)
         {

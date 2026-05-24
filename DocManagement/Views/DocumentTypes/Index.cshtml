@@ -1,0 +1,49 @@
+@model IEnumerable<DocManagement.Models.DocumentType>
+
+@{
+    ViewData["Title"] = "Tələbnamə Tipləri";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0"><i class="bi bi-tag me-2"></i>Tələbnamə Tipləri</h5>
+    <a asp-controller="Settings" asp-action="CreateDocumentType" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg me-1"></i> Yeni
+    </a>
+</div>
+
+<table class="table table-sm table-hover mb-0 align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th style="width:40px">#</th>
+            <th>Ad</th>
+            <th style="width:120px" class="text-end">Əməliyyat</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ int i = 0; }
+        @foreach (var item in Model)
+        {
+            i++;
+            <tr>
+                <td>@i</td>
+                <td class="fw-bold">@item.Name</td>
+                <td class="text-end">
+                    <a asp-controller="Settings" asp-action="EditDocumentType" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <form asp-controller="Settings" asp-action="DeleteDocumentType" asp-route-id="@item.Id"
+                          method="post" class="d-inline" onsubmit="return confirm('Silmək istədiyinizə əminsiniz?')">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (!Model.Any())
+        {
+            <tr><td colspan="3" class="text-center py-3 text-muted">Heç bir tip tapılmadı.</td></tr>
+        }
+    </tbody>
+</table>

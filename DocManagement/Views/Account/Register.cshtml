@@ -23,23 +23,15 @@
         <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
     </div>
 
-    <form asp-action="Register" method="post">
-        <!-- Digər inputlar -->
-
-        <div class="form-group mb-2">
-            <label asp-for="Role"></label>
-            <select asp-for="Role" class="form-control">
-                <option value="">Rol seçin</option>
-                <option value="Admin">Admin</option>
-                <option value="User">User</option>
-                <!-- Buraya digər rollar -->
-            </select>
-            <span asp-validation-for="Role" class="text-danger"></span>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Qeydiyyat</button>
-    </form>
-
+    <div class="form-group mb-2">
+        <label asp-for="Role"></label>
+        <select asp-for="Role" class="form-control">
+            <option value="">Rol seçin</option>
+            <option value="Admin">Admin</option>
+            <option value="User">User</option>
+        </select>
+        <span asp-validation-for="Role" class="text-danger"></span>
+    </div>
 
     <button type="submit" class="btn btn-primary">Qeydiyyatdan keç</button>
 </form>

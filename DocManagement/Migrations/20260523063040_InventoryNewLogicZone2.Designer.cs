@@ -4,6 +4,7 @@ using DocManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523063040_InventoryNewLogicZone2")]
+    partial class InventoryNewLogicZone2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,10 +97,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("EditedByUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("InventoryTypeId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<string>("Note")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -114,8 +113,6 @@ namespace DocManagement.Migrations
                     b.HasIndex("DocumentStatusId");
 
                     b.HasIndex("DocumentTypeId");
-
-                    b.HasIndex("InventoryTypeId");
 
                     b.HasIndex("ZoneId");
 
@@ -157,9 +154,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("Model")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Qty")
-                        .HasColumnType("int");
 
                     b.Property<string>("SerialNumber")
                         .HasMaxLength(100)
@@ -315,9 +309,6 @@ namespace DocManagement.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("EquipmentId")
                         .HasColumnType("int");
 
@@ -338,31 +329,6 @@ namespace DocManagement.Migrations
                     b.HasIndex("EquipmentId");
 
                     b.ToTable("Inventories");
-                });
-
-            modelBuilder.Entity("DocManagement.Models.InventoryType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Action")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InventoryTypes");
                 });
 
             modelBuilder.Entity("DocManagement.Models.StatusColor", b =>
@@ -683,12 +649,6 @@ namespace DocManagement.Migrations
                         .WithMany("Documents")
                         .HasForeignKey("DocumentTypeId");
 
-                    b.HasOne("DocManagement.Models.InventoryType", "InventoryType")
-                        .WithMany()
-                        .HasForeignKey("InventoryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("DocManagement.Models.Zone", "Zone")
                         .WithMany()
                         .HasForeignKey("ZoneId");
@@ -696,8 +656,6 @@ namespace DocManagement.Migrations
                     b.Navigation("DocumentStatus");
 
                     b.Navigation("DocumentType");
-
-                    b.Navigation("InventoryType");
 
                     b.Navigation("Zone");
                 });

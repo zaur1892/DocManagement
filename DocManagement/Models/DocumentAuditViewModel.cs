@@ -1,4 +1,4 @@
-﻿public class DocumentAuditViewModel
+public class DocumentAuditViewModel
 {
     public int LogId { get; set; }
     public DateTime LogInsertDateTime { get; set; }
@@ -26,4 +26,8 @@
     public string LogActionName { get; set; }
 
     public string? DocumentTypeName { get; set; }
+
+    // Yeni əlavə edilən sahələr
+    public string? Location { get; set; }
+    public string? IpAddress { get; set; }
 }

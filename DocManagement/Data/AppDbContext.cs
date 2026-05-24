@@ -1,4 +1,4 @@
-﻿using DocManagement.Models;
+using DocManagement.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +33,9 @@ namespace DocManagement.Data
 
         public DbSet<DocumentAuditViewModel> DocumentAuditView { get; set; }
         public DbSet<DocumentType> DocumentTypes { get; set; }
-
+        public DbSet<DocumentItem> DocumentItems { get; set; }
+        public DbSet<Inventory> Inventories { get; set; }
+        public DbSet<InventoryType> InventoryTypes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,21 +44,15 @@ namespace DocManagement.Data
 
             // 🔥 DOCUMENTS CƏDVƏLİNDƏ TRİGGER VAR DEYƏ EF-Ə DE
             modelBuilder.Entity<Document>()
-                .ToTable(tb =>
+                .ToTable("Documents", tb =>
                 {
                     tb.HasTrigger("trg_Documents_Insert");
                     tb.HasTrigger("trg_Documents_Update");
                 });
 
-            base.OnModelCreating(modelBuilder);
-
             modelBuilder.Entity<DocumentAuditViewModel>()
                 .HasNoKey()
                 .ToView("vw_X_Documents_Audit");
-
- 
-            
-           base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<DocumentListView>()
                 .HasNoKey()

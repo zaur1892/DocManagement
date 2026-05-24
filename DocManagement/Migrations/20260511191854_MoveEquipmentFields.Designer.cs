@@ -4,6 +4,7 @@ using DocManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511191854_MoveEquipmentFields")]
+    partial class MoveEquipmentFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,8 +97,7 @@ namespace DocManagement.Migrations
                     b.Property<string>("EditedByUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("InventoryTypeId")
-                        .IsRequired()
+                    b.Property<int?>("EquipmentId")
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
@@ -115,11 +117,11 @@ namespace DocManagement.Migrations
 
                     b.HasIndex("DocumentTypeId");
 
-                    b.HasIndex("InventoryTypeId");
+                    b.HasIndex("EquipmentId");
 
                     b.HasIndex("ZoneId");
 
-                    b.ToTable("Documents", null, t =>
+                    b.ToTable("Documents", t =>
                         {
                             t.HasTrigger("trg_Documents_Insert");
 
@@ -129,21 +131,9 @@ namespace DocManagement.Migrations
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
-            modelBuilder.Entity("DocManagement.Models.DocumentItem", b =>
+            modelBuilder.Entity("DocManagement.Models.DocumentEquipmentDetail", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EquipmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("InventoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("IpAddress")
@@ -154,24 +144,9 @@ namespace DocManagement.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<string>("Model")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.HasKey("DocumentId");
 
-                    b.Property<int>("Qty")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SerialNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentId");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.ToTable("DocumentItems");
+                    b.ToTable("DocumentEquipmentDetails");
                 });
 
             modelBuilder.Entity("DocManagement.Models.DocumentListView", b =>
@@ -201,6 +176,7 @@ namespace DocManagement.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("EquipmentName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Id")
@@ -216,27 +192,33 @@ namespace DocManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Seria")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusColor")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ZoneId")
                         .HasColumnType("int");
 
                     b.Property<string>("ZoneName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.ToTable((string)null);
@@ -287,9 +269,17 @@ namespace DocManagement.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("Id"));
 
+                    b.Property<string>("Model")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SerialNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int?>("Status")
                         .HasColumnType("int");
@@ -297,72 +287,6 @@ namespace DocManagement.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Equipments");
-                });
-
-            modelBuilder.Entity("DocManagement.Models.Inventory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CurrentIpAddress")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("CurrentLocation")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("EquipmentId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Model")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("SerialNumber")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EquipmentId");
-
-                    b.ToTable("Inventories");
-                });
-
-            modelBuilder.Entity("DocManagement.Models.InventoryType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Action")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InventoryTypes");
                 });
 
             modelBuilder.Entity("DocManagement.Models.StatusColor", b =>
@@ -434,12 +358,6 @@ namespace DocManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EquipmentName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("IpAddress")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("LogActionId")
@@ -683,11 +601,9 @@ namespace DocManagement.Migrations
                         .WithMany("Documents")
                         .HasForeignKey("DocumentTypeId");
 
-                    b.HasOne("DocManagement.Models.InventoryType", "InventoryType")
+                    b.HasOne("DocManagement.Models.Equipment", "Equipment")
                         .WithMany()
-                        .HasForeignKey("InventoryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("EquipmentId");
 
                     b.HasOne("DocManagement.Models.Zone", "Zone")
                         .WithMany()
@@ -697,39 +613,20 @@ namespace DocManagement.Migrations
 
                     b.Navigation("DocumentType");
 
-                    b.Navigation("InventoryType");
+                    b.Navigation("Equipment");
 
                     b.Navigation("Zone");
                 });
 
-            modelBuilder.Entity("DocManagement.Models.DocumentItem", b =>
+            modelBuilder.Entity("DocManagement.Models.DocumentEquipmentDetail", b =>
                 {
                     b.HasOne("DocManagement.Models.Document", "Document")
-                        .WithMany("Items")
-                        .HasForeignKey("DocumentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DocManagement.Models.Equipment", "Equipment")
-                        .WithMany()
-                        .HasForeignKey("EquipmentId")
+                        .WithOne("EquipmentDetail")
+                        .HasForeignKey("DocManagement.Models.DocumentEquipmentDetail", "DocumentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Document");
-
-                    b.Navigation("Equipment");
-                });
-
-            modelBuilder.Entity("DocManagement.Models.Inventory", b =>
-                {
-                    b.HasOne("DocManagement.Models.Equipment", "Equipment")
-                        .WithMany()
-                        .HasForeignKey("EquipmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Equipment");
                 });
 
             modelBuilder.Entity("DocManagement.Models.StatusColor", b =>
@@ -796,7 +693,7 @@ namespace DocManagement.Migrations
 
             modelBuilder.Entity("DocManagement.Models.Document", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("EquipmentDetail");
                 });
 
             modelBuilder.Entity("DocManagement.Models.DocumentStatus", b =>

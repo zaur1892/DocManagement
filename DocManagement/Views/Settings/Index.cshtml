@@ -1,0 +1,302 @@
+@using DocManagement.Controllers
+@model SettingsViewModel
+
+@{
+    ViewData["Title"] = "Sazlamalar";
+    var tab = ViewBag.ActiveTab as string ?? "doctypes";
+}
+
+<div class="d-flex align-items-center mb-3">
+    <h2 class="mb-0"><i class="bi bi-gear-fill me-2 text-secondary"></i>Sazlamalar</h2>
+</div>
+
+<!-- TABS -->
+<ul class="nav nav-tabs mb-0 border-bottom-0" id="settingsTabs">
+    <li class="nav-item">
+        <a class="nav-link @(tab == "doctypes" ? "active fw-bold" : "")"
+           href="@Url.Action("Index", "Settings", new { tab = "doctypes" })">
+            🗂 Tələbnamə Tipləri
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "invtypes" ? "active fw-bold" : "")"
+           href="@Url.Action("Index", "Settings", new { tab = "invtypes" })">
+            📦 İnventar Tipləri
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "equipments" ? "active fw-bold" : "")"
+           href="@Url.Action("Index", "Settings", new { tab = "equipments" })">
+            ⚙️ Avadanlıqlar
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "zones" ? "active fw-bold" : "")"
+           href="@Url.Action("Index", "Settings", new { tab = "zones" })">
+            🏢 Zonalar
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(tab == "appsettings" ? "active fw-bold" : "")"
+           href="@Url.Action("Index", "Settings", new { tab = "appsettings" })">
+            🔧 Sistem Parametrləri
+        </a>
+    </li>
+</ul>
+
+<div class="card shadow-sm border-top-0 rounded-0 rounded-bottom">
+    <div class="card-body">
+
+        <!-- ==================== DOCUMENT TYPES TAB ==================== -->
+        @if (tab == "doctypes")
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-muted">Tələbnamə tipləri siyahısı</h6>
+                <a asp-action="CreateDocumentType" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Yeni Tip
+                </a>
+            </div>
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Ad</th>
+                        <th style="width:110px" class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int i = 0; }
+                    @foreach (var item in Model.DocumentTypes)
+                    {
+                        i++;
+                        <tr>
+                            <td>@i</td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td class="text-end">
+                                <a asp-action="EditDocumentType" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteDocumentType" asp-route-id="@item.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Silinsin?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.DocumentTypes.Any())
+                    {
+                        <tr><td colspan="3" class="text-center py-3 text-muted">Boşdur.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- ==================== INVENTORY TYPES TAB ==================== -->
+        @if (tab == "invtypes")
+        {
+            <div class="alert alert-info py-2 mb-3 small">
+                <strong>0 — Təsir Etmir:</strong> Təmir, Baxış kimi tiplər — inventara heç nə yazılmır.<br/>
+                <strong>1 — Mədaxil (Alış):</strong> Sənəd "Tamamlandı" olduqda seriya nömrəli məhsullar inventara əlavə olunur.<br/>
+                <strong>2 — Yerdəyişmə:</strong> Mövcud inventardakı məhsulun Məkan/IP-si yenilənir.
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-muted">İnventar tipi siyahısı</h6>
+                <a asp-action="CreateInventoryType" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Yeni Tip
+                </a>
+            </div>
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Ad</th>
+                        <th>Əməliyyat Növü</th>
+                        <th>Açıqlama</th>
+                        <th style="width:110px" class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int j = 0; }
+                    @foreach (var item in Model.InventoryTypes)
+                    {
+                        j++;
+                        <tr>
+                            <td>@j</td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td>
+                                @if (item.Action == 1)
+                                { <span class="badge bg-success"><i class="bi bi-box-arrow-in-down me-1"></i>Mədaxil</span> }
+                                else if (item.Action == 2)
+                                { <span class="badge bg-warning text-dark"><i class="bi bi-arrow-left-right me-1"></i>Yerdəyişmə</span> }
+                                else
+                                { <span class="badge bg-secondary"><i class="bi bi-dash me-1"></i>Təsir Etmir</span> }
+                            </td>
+                            <td class="text-muted small">@item.Description</td>
+                            <td class="text-end">
+                                <a asp-action="EditInventoryType" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="DeleteInventoryType" asp-route-id="@item.Id" method="post" class="d-inline"
+                                      onsubmit="return confirm('Silinsin?')">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.InventoryTypes.Any())
+                    {
+                        <tr><td colspan="5" class="text-center py-3 text-muted">Heç bir inventar tipi tapılmadı.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- ==================== EQUIPMENTS TAB ==================== -->
+        @if (tab == "equipments")
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-muted">Avadanlıq siyahısı</h6>
+                <a asp-action="CreateEquipment" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Yeni Avadanlıq
+                </a>
+            </div>
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Ad</th>
+                        <th style="width:90px">Status</th>
+                        <th style="width:140px" class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int k = 0; }
+                    @foreach (var item in Model.Equipments)
+                    {
+                        k++;
+                        <tr>
+                            <td>@k</td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td>
+                                @if (item.Status == 1)
+                                { <span class="badge bg-success">Aktiv</span> }
+                                else
+                                { <span class="badge bg-secondary">Passiv</span> }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="EditEquipment" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ToggleEquipment" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm @(item.Status == 1 ? "btn-outline-secondary" : "btn-outline-success")"
+                                            title="@(item.Status == 1 ? "Deaktiv et" : "Aktiv et")">
+                                        <i class="bi @(item.Status == 1 ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Equipments.Any())
+                    {
+                        <tr><td colspan="4" class="text-center py-3 text-muted">Boşdur.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- ==================== ZONES TAB ==================== -->
+        @if (tab == "zones")
+        {
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="mb-0 text-muted">Zona siyahısı</h6>
+                <a asp-action="CreateZone" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i> Yeni Zona
+                </a>
+            </div>
+            <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:40px">#</th>
+                        <th>Ad</th>
+                        <th style="width:90px">Status</th>
+                        <th style="width:140px" class="text-end">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int l = 0; }
+                    @foreach (var item in Model.Zones)
+                    {
+                        l++;
+                        <tr>
+                            <td>@l</td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td>
+                                @if (item.Status == 1)
+                                { <span class="badge bg-success">Aktiv</span> }
+                                else
+                                { <span class="badge bg-secondary">Passiv</span> }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="EditZone" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form asp-action="ToggleZone" asp-route-id="@item.Id" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button class="btn btn-sm @(item.Status == 1 ? "btn-outline-secondary" : "btn-outline-success")"
+                                            title="@(item.Status == 1 ? "Deaktiv et" : "Aktiv et")">
+                                        <i class="bi @(item.Status == 1 ? "bi-toggle-on" : "bi-toggle-off")"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Zones.Any())
+                    {
+                        <tr><td colspan="4" class="text-center py-3 text-muted">Boşdur.</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <!-- ==================== APP SETTINGS TAB ==================== -->
+        @if (tab == "appsettings")
+        {
+            <form asp-action="SaveAppSettings" method="post">
+                @Html.AntiForgeryToken()
+                <h6 class="text-muted mb-3">Sistem parametrləri</h6>
+                <table class="table table-sm table-hover align-middle mb-3">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Açar (Key)</th>
+                            <th>Dəyər (Value)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int m = 0; m < Model.AppSettings.Count; m++)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="settings[@m].Key" value="@Model.AppSettings[m].Key" />
+                                    <code>@Model.AppSettings[m].Key</code>
+                                </td>
+                                <td>
+                                    <input type="text" name="settings[@m].Value" value="@Model.AppSettings[m].Value"
+                                           class="form-control form-control-sm" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-check-lg me-1"></i> Parametrləri Yadda Saxla
+                </button>
+            </form>
+        }
+
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">

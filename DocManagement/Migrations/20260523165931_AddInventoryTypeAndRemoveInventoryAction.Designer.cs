@@ -4,6 +4,7 @@ using DocManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523165931_AddInventoryTypeAndRemoveInventoryAction")]
+    partial class AddInventoryTypeAndRemoveInventoryAction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,7 +98,6 @@ namespace DocManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("InventoryTypeId")
-                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<string>("Note")
@@ -157,9 +159,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("Model")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Qty")
-                        .HasColumnType("int");
 
                     b.Property<string>("SerialNumber")
                         .HasMaxLength(100)
@@ -314,9 +313,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("CurrentLocation")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
-
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
 
                     b.Property<int>("EquipmentId")
                         .HasColumnType("int");
@@ -685,9 +681,7 @@ namespace DocManagement.Migrations
 
                     b.HasOne("DocManagement.Models.InventoryType", "InventoryType")
                         .WithMany()
-                        .HasForeignKey("InventoryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("InventoryTypeId");
 
                     b.HasOne("DocManagement.Models.Zone", "Zone")
                         .WithMany()

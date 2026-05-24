@@ -4,6 +4,7 @@ using DocManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocManagement.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260523060110_InventoryNewLogic")]
+    partial class InventoryNewLogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -94,10 +97,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("EditedByUserId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("InventoryTypeId")
-                        .IsRequired()
-                        .HasColumnType("int");
-
                     b.Property<string>("Note")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -106,18 +105,11 @@ namespace DocManagement.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ZoneId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DocumentStatusId");
 
                     b.HasIndex("DocumentTypeId");
-
-                    b.HasIndex("InventoryTypeId");
-
-                    b.HasIndex("ZoneId");
 
                     b.ToTable("Documents", null, t =>
                         {
@@ -157,9 +149,6 @@ namespace DocManagement.Migrations
                     b.Property<string>("Model")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Qty")
-                        .HasColumnType("int");
 
                     b.Property<string>("SerialNumber")
                         .HasMaxLength(100)
@@ -201,6 +190,7 @@ namespace DocManagement.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("EquipmentName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Id")
@@ -216,27 +206,33 @@ namespace DocManagement.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Seria")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusColor")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("StatusName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ZoneId")
                         .HasColumnType("int");
 
                     b.Property<string>("ZoneName")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.ToTable((string)null);
@@ -315,9 +311,6 @@ namespace DocManagement.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int?>("DocumentId")
-                        .HasColumnType("int");
-
                     b.Property<int>("EquipmentId")
                         .HasColumnType("int");
 
@@ -338,31 +331,6 @@ namespace DocManagement.Migrations
                     b.HasIndex("EquipmentId");
 
                     b.ToTable("Inventories");
-                });
-
-            modelBuilder.Entity("DocManagement.Models.InventoryType", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Action")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("InventoryTypes");
                 });
 
             modelBuilder.Entity("DocManagement.Models.StatusColor", b =>
@@ -683,23 +651,9 @@ namespace DocManagement.Migrations
                         .WithMany("Documents")
                         .HasForeignKey("DocumentTypeId");
 
-                    b.HasOne("DocManagement.Models.InventoryType", "InventoryType")
-                        .WithMany()
-                        .HasForeignKey("InventoryTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("DocManagement.Models.Zone", "Zone")
-                        .WithMany()
-                        .HasForeignKey("ZoneId");
-
                     b.Navigation("DocumentStatus");
 
                     b.Navigation("DocumentType");
-
-                    b.Navigation("InventoryType");
-
-                    b.Navigation("Zone");
                 });
 
             modelBuilder.Entity("DocManagement.Models.DocumentItem", b =>

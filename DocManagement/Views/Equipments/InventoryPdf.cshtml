@@ -1,0 +1,99 @@
+@model IEnumerable<DocManagement.Controllers.InventoryViewModel>
+
+@{
+    Layout = null; // No layout for PDF
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>İnventar Siyahısı</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+        }
+        h2 {
+            text-align: center;
+            color: #1F4E78;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #1F4E78;
+            color: white;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .inner-table th {
+            background-color: #f2f2f2;
+            color: #333;
+            font-size: 11px;
+            padding: 4px;
+        }
+        .inner-table td {
+            font-size: 11px;
+            padding: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Avadanlıqların siyahısı (İnventar) - @DateTime.Now.ToString("dd.MM.yyyy")</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 5%;">#</th>
+                <th style="width: 25%;">Avadanlıq</th>
+                <th style="width: 10%;" class="text-center">Ümumi Say</th>
+                <th style="width: 60%;">Detallar (Seriya / Model / Zona / Məkan / IP)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(Model.ToList().IndexOf(item) + 1)</td>
+                    <td><strong>@item.EquipmentName</strong></td>
+                    <td class="text-center">@item.Count</td>
+                    <td style="padding: 0;">
+                        @if (item.Details.Any())
+                        {
+                            <table class="inner-table" style="margin: 0; border: none; width: 100%;">
+                                @foreach (var detail in item.Details)
+                                {
+                                    <tr>
+                                        <td style="border: none; border-bottom: 1px solid #eee;">
+                                            @(string.IsNullOrEmpty(detail.SerialNumber) ? "-" : detail.SerialNumber) /
+                                            @(string.IsNullOrEmpty(detail.Model) ? "-" : detail.Model) /
+                                            @(string.IsNullOrEmpty(detail.ZoneName) ? "-" : detail.ZoneName) /
+                                            @(string.IsNullOrEmpty(detail.Location) ? "-" : detail.Location) /
+                                            @(string.IsNullOrEmpty(detail.IpAddress) ? "-" : detail.IpAddress)
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                        }
+                        else
+                        {
+                            <span style="padding: 8px; display: block;">-</span>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

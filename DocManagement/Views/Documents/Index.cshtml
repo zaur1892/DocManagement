@@ -1,4 +1,4 @@
-﻿@model IEnumerable<DocManagement.Models.DocumentListView>
+@model IEnumerable<DocManagement.Models.DocumentListView>
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @using System.Globalization
 
@@ -21,12 +21,51 @@
     var columns = ViewBag.Columns as List<DocManagement.Models.DocElement>;
 }
 
-<h1>Tələbnamələr</h1>
+<style>
+    /* ── Əməliyyatlar sütunu həmişə bir sətirdə qalsın ── */
+    .col-actions {
+        width: 1%;
+        white-space: nowrap;
+        vertical-align: middle !important;
+    }
 
-<div style="text-align:right; font-weight:bold; margin-bottom:10px;">
-    <div id="dateTimeAz"></div>
-    <div id="weekDayAz" style="font-size:14px;"></div>
-</div>
+    /* ── Sütunların sıxışmasının qarşısını almaq üçün ── */
+    #mainTable th, #mainTable td {
+        white-space: nowrap;
+    }
+
+    /* ── Mətn qısaltma + tooltip ── */
+    .col-note {
+        max-width: 180px;
+    }
+
+    .truncate-cell {
+        display: block;
+        max-width: 180px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        cursor: default;
+    }
+
+    /* ── Axtarış sırası inputları ── */
+    .search-row input {
+        width: 100%;
+        padding: 3px 6px;
+        font-size: 0.8rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    /* Axtarış sırası hüceyrəsi padding azalt */
+    .search-row th {
+        padding: 4px 6px !important;
+        background: #f8f9fa;
+    }
+</style>
+
+<h1>Tələbnamələr</h1>
 
 <p>
     <a class="btn btn-primary" asp-action="Create">Yeni Tələbnamə</a>
@@ -82,156 +121,180 @@
 
 
 <div class="table-responsive">
-    <table class="table table-striped table-bordered align-middle">
+    <table id="mainTable" class="table table-striped table-bordered align-middle">
 
         <thead class="table-light">
+            @* ── 1. Başlıq sırası ── *@
             <tr>
-
-
                 @foreach (var col in columns)
                 {
                     <th>@col.DisplayName</th>
                 }
+                <th class="col-actions">Əməliyyatlar</th>
+            </tr>
 
-                <th>Əməliyyatlar</th>
-
+            @* ── 2. Axtarış sırası ── *@
+            <tr class="search-row">
+                @foreach (var col in columns)
+                {
+                    <th>
+                        <input type="text"
+                               data-col="@col.ColumnName"
+                               placeholder="🔍 @col.DisplayName" />
+                    </th>
+                }
+                <th></th>@* Əməliyyatlar üçün boş *@
             </tr>
         </thead>
 
         <tbody>
-
             @foreach (var d in Model)
             {
                 <tr>
-
-                  
-
                     @foreach (var col in columns)
                     {
-                        <td>
-
-                            @if (col.ColumnName == "DocumentTypeName")
-                            {
-                                @d.DocumentTypeName
-                            }
-
-                            else if (col.ColumnName == "Id")
-                            {
-                                @d.Id
-                            }
-
-
-                            else if (col.ColumnName == "CreatedAt")
-                            {
+                        @if (col.ColumnName == "Note")
+                        {
+                            var noteText = string.IsNullOrWhiteSpace(d.Note) ? "-" : d.Note;
+                            <td class="col-note" data-col="Note">
+                                <span class="truncate-cell" title="@noteText">@noteText</span>
+                            </td>
+                        }
+                        else if (col.ColumnName == "DocumentTypeName")
+                        {
+                            <td data-col="DocumentTypeName">@d.DocumentTypeName</td>
+                        }
+                        else if (col.ColumnName == "Id")
+                        {
+                            <td data-col="Id">@d.Id</td>
+                        }
+                        else if (col.ColumnName == "CreatedAt")
+                        {
+                            <td data-col="CreatedAt">
                                 @d.CreatedAt.ToString("dd.MM.yyyy", CultureInfo.GetCultureInfo("az-AZ"))
-                            }
-                            else if (col.ColumnName == "StatusName")
-                            {
+                            </td>
+                        }
+                        else if (col.ColumnName == "StatusName")
+                        {
+                            <td data-col="StatusName">
                                 <span class="badge" style="background:@d.StatusColor;color:white">
                                     @d.StatusName
                                 </span>
-                            }
-                            else if (col.ColumnName == "ZoneName")
-                            {
-                                @(d.ZoneName ?? "-")
-                            }
-                            else if (col.ColumnName == "EquipmentName")
-                            {
-                                @(d.EquipmentName ?? "-")
-                            }
-                            else if (col.ColumnName == "Note")
-                            {
-                                @(string.IsNullOrWhiteSpace(d.Note) ? "-" : d.Note)
-                            }
-                            else if (col.ColumnName == "CustomFieldName1")
-                            {
-                                @(string.IsNullOrWhiteSpace(d.CustomFieldName1) ? "-" : d.CustomFieldName1)
-                            }
-                            else if (col.ColumnName == "CustomFieldName2")
-                            {
-                                @(string.IsNullOrWhiteSpace(d.CustomFieldName2) ? "-" : d.CustomFieldName2)
-                            }
-                            else if (col.ColumnName == "CustomFieldName3")
-                            {
-                                @(string.IsNullOrWhiteSpace(d.CustomFieldName3) ? "-" : d.CustomFieldName3)
-                            }
-
-                        </td>
+                            </td>
+                        }
+                        else if (col.ColumnName == "ZoneName")
+                        {
+                            <td data-col="ZoneName">@(d.ZoneName ?? "-")</td>
+                        }
+                        else if (col.ColumnName == "EquipmentName")
+                        {
+                            <td data-col="EquipmentName">@(d.EquipmentName ?? "-")</td>
+                        }
+                        else if (col.ColumnName == "CustomFieldName1")
+                        {
+                            <td data-col="CustomFieldName1">@(string.IsNullOrWhiteSpace(d.CustomFieldName1) ? "-" : d.CustomFieldName1)</td>
+                        }
+                        else if (col.ColumnName == "CustomFieldName2")
+                        {
+                            <td data-col="CustomFieldName2">@(string.IsNullOrWhiteSpace(d.CustomFieldName2) ? "-" : d.CustomFieldName2)</td>
+                        }
+                        else if (col.ColumnName == "CustomFieldName3")
+                        {
+                            <td data-col="CustomFieldName3">@(string.IsNullOrWhiteSpace(d.CustomFieldName3) ? "-" : d.CustomFieldName3)</td>
+                        }
+                        else if (col.ColumnName == "Seria")
+                        {
+                            <td data-col="Seria">@(string.IsNullOrWhiteSpace(d.Seria) ? "-" : d.Seria)</td>
+                        }
+                        else if (col.ColumnName == "Model")
+                        {
+                            <td data-col="Model">@(string.IsNullOrWhiteSpace(d.Model) ? "-" : d.Model)</td>
+                        }
+                        else if (col.ColumnName == "Location")
+                        {
+                            <td data-col="Location">@(string.IsNullOrWhiteSpace(d.Location) ? "-" : d.Location)</td>
+                        }
+                        else if (col.ColumnName == "IpAddress")
+                        {
+                            <td data-col="IpAddress">@(string.IsNullOrWhiteSpace(d.IpAddress) ? "-" : d.IpAddress)</td>
+                        }
+                        else
+                        {
+                            var prop = d.GetType().GetProperty(col.ColumnName);
+                            var val = prop != null ? prop.GetValue(d)?.ToString() : null;
+                            <td data-col="@col.ColumnName">@(string.IsNullOrWhiteSpace(val) ? "-" : val)</td>
+                        }
                     }
 
-                    <td>
-
+                    @* ── Əməliyyatlar: nowrap sayəsində heç vaxt alt-alta düşməz ── *@
+                    <td class="col-actions">
                         @if (isAdmin)
                         {
                             <a asp-action="Edit" asp-route-id="@d.Id" class="btn btn-sm btn-info">Redaktə</a>
                             <a asp-action="Delete" asp-route-id="@d.Id" class="btn btn-sm btn-danger">Sil</a>
                         }
-
                         <a asp-action="Details" asp-route-id="@d.Id" class="btn btn-sm btn-secondary">Detal</a>
-
                     </td>
-
                 </tr>
             }
-
         </tbody>
     </table>
 </div>
 
 
 <script>
-
-    function updateDateTimeAz(){
-    const now = new Date();
-
-    const days = [
-    "Bazar",
-    "Bazar ertəsi",
-    "Çərşənbə axşamı",
-    "Çərşənbə",
-    "Cümə axşamı",
-    "Cümə",
-    "Şənbə"
-    ];
-
-    document.getElementById("dateTimeAz").innerText = now.toLocaleString("az-AZ");
-    document.getElementById("weekDayAz").innerText = days[now.getDay()];
-    }
-
-    updateDateTimeAz();
-    setInterval(updateDateTimeAz,1000);
-
-
-    function setLinkQuery(linkId){
-
-    const link = document.getElementById(linkId);
-
-    link.addEventListener('click',function(e){
-
-    e.preventDefault();
-
-    const start = document.querySelector('input[name="startDate"]').value;
-    const end = document.querySelector('input[name="endDate"]').value;
-
-    const url = new URL(link.href,window.location.origin);
-
-    if(start) url.searchParams.set("startDate",start);
-    if(end) url.searchParams.set("endDate",end);
-
-    const docType = document.querySelector('select[name="documentTypeId"]').value;
-    const status = document.querySelector('select[name="statusId"]').value;
-
-    if(docType) url.searchParams.set("documentTypeId",docType);
-    if(status) url.searchParams.set("statusId",status);
-
-    window.location.href = url;
-
-    });
-
+    // ── Naviqasiya linklərinin filter parametrlərini daşıması ──
+    function setLinkQuery(linkId) {
+        const link = document.getElementById(linkId);
+        if (!link) return;
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const start = document.querySelector('input[name="startDate"]').value;
+            const end = document.querySelector('input[name="endDate"]').value;
+            const url = new URL(link.href, window.location.origin);
+            if (start) url.searchParams.set("startDate", start);
+            if (end) url.searchParams.set("endDate", end);
+            const docType = document.querySelector('select[name="documentTypeId"]').value;
+            const status = document.querySelector('select[name="statusId"]').value;
+            if (docType) url.searchParams.set("documentTypeId", docType);
+            if (status) url.searchParams.set("statusId", status);
+            window.location.href = url;
+        });
     }
 
     setLinkQuery("teleblerimLink");
     setLinkQuery("tamamlananlarLink");
     setLinkQuery("excelLink");
 
+    // ── Sütun axtarışı (client-side filter) ──
+    document.querySelectorAll('.search-row input').forEach(function (input) {
+        input.addEventListener('input', function () {
+            applyColumnFilters();
+        });
+    });
+
+    function applyColumnFilters() {
+        // Hər input üçün: {colName -> axtarış mətni}
+        const filters = {};
+        document.querySelectorAll('.search-row input[data-col]').forEach(function (inp) {
+            const val = inp.value.trim().toLowerCase();
+            if (val) filters[inp.dataset.col] = val;
+        });
+
+        const rows = document.querySelectorAll('#mainTable tbody tr');
+        rows.forEach(function (row) {
+            let visible = true;
+            for (const [colName, searchVal] of Object.entries(filters)) {
+                const cell = row.querySelector('td[data-col="' + colName + '"]');
+                if (cell) {
+                    const cellText = cell.textContent.trim().toLowerCase();
+                    if (!cellText.includes(searchVal)) {
+                        visible = false;
+                        break;
+                    }
+                }
+            }
+            row.style.display = visible ? '' : 'none';
+        });
+    }
 </script>

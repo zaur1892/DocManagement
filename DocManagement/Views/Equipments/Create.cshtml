@@ -1,0 +1,24 @@
+@model DocManagement.Models.Equipment
+
+@{
+    ViewData["Title"] = "Yeni Avadanlıq";
+}
+
+<h2>Yeni Avadanlıq Əlavə Et</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label">Adı</label>
+                <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            
+
+
+            <button type="submit" class="btn btn-success">Yadda saxla</button>
+            <a asp-action="Index" class="btn btn-secondary">Geri</a>
+        </form>
+    </div>
+</div>

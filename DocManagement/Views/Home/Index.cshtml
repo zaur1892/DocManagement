@@ -1,8 +1,155 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DocManagement.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="mb-3">İş Paneli (Dashboard)</h2>
+            <form method="get" asp-action="Index" class="card p-3 shadow-sm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Başlanğıc Tarix</label>
+                        <input type="date" name="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Bitiş Tarix</label>
+                        <input type="date" name="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Qruplaşdırma</label>
+                        <select name="groupBy" class="form-select">
+                            <option value="Day" selected="@(Model.GroupBy == "Day")">Gün</option>
+                            <option value="Month" selected="@(Model.GroupBy == "Month")">Ay</option>
+                            <option value="Year" selected="@(Model.GroupBy == "Year")">İl</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-filter"></i> Filtrlə</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card bg-primary text-white shadow-sm h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title">Ümumi İş Sayı</h5>
+                    <h1 class="display-3 fw-bold">@Model.TotalJobs</h1>
+                    <p class="mb-0">Seçilmiş tarix aralığında</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mb-3">
+            <div class="card bg-success text-white shadow-sm h-100">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <h5 class="card-title">Tamamlanmış İş Sayı</h5>
+                    <h1 class="display-3 fw-bold">@Model.CompletedJobs</h1>
+                    <p class="mb-0">"AppSettings" əsasında hesablanıb</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <!-- Status Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Statuslara Görə İşlər</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <!-- Equipment Chart -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">Avadanlıqlara Görə İşlər</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="equipmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Status Chart Data
+            var statusLabels = @Html.Raw(Json.Serialize(Model.JobsByStatus.Keys));
+            var statusData = @Html.Raw(Json.Serialize(Model.JobsByStatus.Values));
+
+            var statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: statusLabels,
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: [
+                            '#0d6efd', // primary
+                            '#198754', // success
+                            '#ffc107', // warning
+                            '#dc3545', // danger
+                            '#6c757d', // secondary
+                            '#0dcaf0', // info
+                            '#20c997', // teal
+                            '#6610f2'  // purple
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+
+            // Equipment Chart Data
+            var equipmentLabels = @Html.Raw(Json.Serialize(Model.JobsByEquipment.Keys));
+            var equipmentData = @Html.Raw(Json.Serialize(Model.JobsByEquipment.Values));
+
+            var equipmentCtx = document.getElementById('equipmentChart').getContext('2d');
+            new Chart(equipmentCtx, {
+                type: 'bar',
+                data: {
+                    labels: equipmentLabels,
+                    datasets: [{
+                        label: 'İş Sayı',
+                        data: equipmentData,
+                        backgroundColor: '#0d6efd',
+                        borderColor: '#0a58ca',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        });
+    </script>
+}

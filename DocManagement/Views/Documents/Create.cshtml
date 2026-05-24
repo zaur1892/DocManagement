@@ -1,4 +1,4 @@
-﻿@model DocManagement.Models.Document
+@model DocManagement.Models.Document
 
 @{
     ViewData["Title"] = "Yeni Sənəd";
@@ -10,14 +10,27 @@
 
     <!-- TƏLƏBNAMƏ (DOCUMENT TYPE COMBO) -->
     <div class="mb-3">
-        <label class="form-label">Tələbnamə</label>
+        <label class="form-label">Tələbnamə Tipi</label>
         <select asp-for="DocumentTypeId"
                 asp-items="ViewBag.DocumentTypeList"
                 class="form-control">
-            <option value="">-- Tələbnamə seçin --</option>
+            <option value="">-- Tələbnamə tipi seçin --</option>
         </select>
         <span asp-validation-for="DocumentTypeId" class="text-danger"></span>
     </div>
+
+    <!-- İNVENTAR TİPİ -->
+    <div class="mb-3">
+        <label class="form-label">İnventar Tipi <span class="text-muted small">(Alış, Təmir, Yerdəyişmə...)</span></label>
+        <select asp-for="InventoryTypeId"
+                asp-items="ViewBag.InventoryTypeList"
+                class="form-control"
+                id="inventoryTypeSelect"
+                onchange="updateInventoryBanner()">
+            <option value="">İnventar tipi seçin (istəyə görə)</option>
+        </select>
+    </div>
+    <div id="inventoryBanner" class="alert mb-2" style="display:none;"></div>
 
     <!-- STATUS -->
     <div class="mb-3">
@@ -35,13 +48,41 @@
         </select>
     </div>
 
-    <!-- AVADANLIQ (SELECT2 AXTARIŞLI) -->
-    <div class="mb-3">
-        <label class="form-label">Avadanlıq</label>
-        <select asp-for="EquipmentId" asp-items="ViewBag.EquipmentList" class="select2" style="width:100%">
-            <option value="">-- Avadanlıq seçin --</option>
+    <hr />
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4>Avadanlıqlar (Sətrlər)</h4>
+        <button type="button" class="btn btn-sm btn-primary" onclick="addRow()">+ Sətr Əlavə Et</button>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-bordered" id="itemsTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Avadanlıq Növü <span class="text-danger">*</span></th>
+                    <th>Seriya Nömrəsi</th>
+                    <th>Model</th>
+                    <th>Lokasiya</th>
+                    <th>IP Ünvan</th>
+                    <th style="width:70px;">Say</th>
+                    <th>İnventar</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="itemsBody">
+                <!-- Javascript will insert rows here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Gizli şablon Dropdown üçün -->
+    <div style="display:none" id="equipmentTemplate">
+        <select class="form-control select2-template" name="Items[#INDEX#].EquipmentId" disabled required>
+            <option value="">-- Seçin --</option>
+            @foreach(var item in ViewBag.EquipmentList as SelectList)
+            {
+                <option value="@item.Value">@item.Text</option>
+            }
         </select>
-        <span asp-validation-for="EquipmentId" class="text-danger"></span>
     </div>
 
     <!-- QEYD -->
@@ -56,12 +97,135 @@
 
 @section Scripts {
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({
-                placeholder: "-- Avadanlıq seçin --",
+        let rowIndex = 0;
+
+        function addRow() {
+            // Remove the 'disabled' attribute when using the template
+            let selectHtml = $('#equipmentTemplate').html().replace(/#INDEX#/g, rowIndex).replace('disabled', '');
+            
+            let rowHtml = `
+                <tr id="row_${rowIndex}">
+                    <td>${selectHtml}</td>
+                    <td>
+                        <div class="input-group">
+                            <input type="text"
+                                   name="Items[${rowIndex}].SerialNumber"
+                                   class="form-control serial-input"
+                                   placeholder="Seriya nömrəsi"
+                                   data-row="${rowIndex}"
+                                   autocomplete="off" />
+                        </div>
+                    </td>
+                    <td><input type="text" name="Items[${rowIndex}].Model" class="form-control" placeholder="Model" /></td>
+                    <td><input type="text" name="Items[${rowIndex}].Location" class="form-control" placeholder="Otaq/Zona" /></td>
+                    <td><input type="text" name="Items[${rowIndex}].IpAddress" class="form-control" placeholder="192.168..." /></td>
+                    <td><input type="number" name="Items[${rowIndex}].Qty" class="form-control text-center" value="1" min="1" style="width:60px;" /></td>
+                    <td id="inv-status-${rowIndex}" style="min-width:80px;vertical-align:middle"></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removeRow(${rowIndex})">X</button>
+                    </td>
+                </tr>
+            `;
+            
+            $('#itemsBody').append(rowHtml);
+            
+            // Re-initialize select2 for the new row if needed
+            $(`#row_${rowIndex} select`).select2({
+                placeholder: "-- Seçin --",
                 allowClear: true,
                 width: '100%'
             });
+
+            // Serial input üçün lookup hadisəsi
+            bindSerialLookup(rowIndex);
+
+            rowIndex++;
+        }
+
+        function removeRow(index) {
+            $(`#row_${index}`).remove();
+        }
+
+        // Seriya nömrəsinə görə inventardan məlumat gətir
+        let serialTimers = {};
+        function bindSerialLookup(idx) {
+            $(`#row_${idx} .serial-input`).on('input', function() {
+                const serial = $(this).val().trim();
+                const row = $(`#row_${idx}`);
+                const statusCell = $(`#inv-status-${idx}`);
+
+                clearTimeout(serialTimers[idx]);
+
+                if (!serial) {
+                    statusCell.html('');
+                    return;
+                }
+
+                statusCell.html('<span class="text-muted"><small>🔍...</small></span>');
+
+                serialTimers[idx] = setTimeout(function() {
+                    $.getJSON('/Equipments/LookupBySerial', { serial: serial }, function(data) {
+                        if (data) {
+                            // Məlumatları doldur
+                            if (data.model)     row.find('[name$=".Model"]').val(data.model);
+                            if (data.location)  row.find('[name$=".Location"]').val(data.location);
+                            if (data.ipAddress) row.find('[name$=".IpAddress"]').val(data.ipAddress);
+                            // Avadanlıq növünü seç
+                            if (data.equipmentId) {
+                                row.find('select').val(data.equipmentId).trigger('change');
+                            }
+                            statusCell.html('<span class="badge bg-success" title="İnventarda mövcuddur">✓ İnventarda</span>');
+                        } else {
+                            statusCell.html('<span class="badge bg-warning text-dark" title="İnventarda yoxdur — yeni əlavə">Yeni</span>');
+                        }
+                    }).fail(function() {
+                        statusCell.html('');
+                    });
+                }, 500);
+            });
+        }
+
+        $(document).ready(function () {
+            // Səhifə açılanda avtomatik 1 sətr əlavə et
+            addRow();
+            updateInventoryBanner();
+        });
+
+        // İnventar Tipi dəyişdikdə canlı banner göstər
+        function updateInventoryBanner() {
+            const sel = document.getElementById('inventoryTypeSelect');
+            const banner = document.getElementById('inventoryBanner');
+            if (!sel || !banner) return;
+
+            const selectedOption = sel.options[sel.selectedIndex];
+            const val = sel.value;
+
+            if (!val) {
+                banner.style.display = 'none';
+                return;
+            }
+
+            $.getJSON('/Settings/GetInventoryTypeAction', { id: val }, function(data) {
+                banner.style.display = 'block';
+                if (data.action === 0) {
+                    banner.className = 'alert alert-secondary mb-2';
+                    banner.innerHTML = '⚠️ <strong>' + selectedOption.text + '</strong> seçildi. Bu tip inventara <strong>təsir etmir</strong>.';
+                } else if (data.action === 1) {
+                    banner.className = 'alert alert-success mb-2';
+                    banner.innerHTML = '✅ <strong>' + selectedOption.text + '</strong> — Avadanlıq inventara <strong>mədaxil</strong> olunacaq.';
+                } else if (data.action === 2) {
+                    banner.className = 'alert alert-info mb-2';
+                    banner.innerHTML = '📦 <strong>' + selectedOption.text + '</strong> — Mövcud inventar qeydinin <strong>yerdəyişməsi</strong> qeyd ediləcək.';
+                }
+            });
+        }
+        
+        // Enter düyməsini basanda formun yadda saxlanmasının qarşısını al
+        $(document).on('keypress', 'input,select', function (e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                return false;
+            }
         });
     </script>
 }
